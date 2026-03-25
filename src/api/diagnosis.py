@@ -197,6 +197,16 @@ def _parse_action_items(text: str) -> list[ActionItem]:
         if not section.strip():
             continue
 
+        # 跳过 Agent 过渡语（非行动建议内容）
+        first_line_raw = section.strip().split("\n")[0].strip()
+        skip_patterns = [
+            r"数据已.*获取", r"以下是.*分析", r"以下是.*计划",
+            r"综合.*分析", r"根据.*分析", r"基于.*数据",
+            r"^---$", r"^##\s", r"总结",
+        ]
+        if any(re.search(p, first_line_raw) for p in skip_patterns):
+            continue
+
         # 提取优先级
         priority = "P2"
         if re.search(r"P0|紧急", section):
@@ -208,22 +218,39 @@ def _parse_action_items(text: str) -> list[ActionItem]:
         elif re.search(r"P2|中优", section):
             priority = "P2"
 
-        # 提取标题（第一行）
+        # 提取标题（第一行），清理 markdown 残留
         first_line = section.strip().split("\n")[0]
-        title = re.sub(r"^[\d\.\、#*\s]*(?:P[0-3]|紧急|高优|中优|低优)[^:：]*[:：]\s*", "", first_line).strip()
-        title = re.sub(r"^\d+[\.\、]\s*", "", title).strip()
-        title = re.sub(r"\*\*", "", title).strip()
-        if not title:
+        title = first_line
+        # 去掉 markdown 标题符号
+        title = re.sub(r"^#{1,3}\s*", "", title)
+        # 去掉优先级前缀（各种格式）
+        title = re.sub(r"^(?:\*\*)?P[0-3]\s*(?:\*\*)?\s*", "", title)
+        title = re.sub(r"^(?:紧急|高优|中优|低优)\s*", "", title)
+        # 去掉 emoji
+        title = re.sub(r"[\U0001f300-\U0001f9ff\U00002600-\U000027bf]", "", title)
+        # 去掉 markdown bold
+        title = re.sub(r"\*\*", "", title)
+        # 去掉前导符号
+        title = re.sub(r"^[\d\.\、:：\-—\s]+", "", title).strip()
+        if not title or len(title) < 3:
             title = first_line.strip()[:100]
 
-        # 提取步骤
+        # 提取步骤（去掉与标题重复的行和预期效果行）
         steps = []
-        for line in section.split("\n"):
+        for line in section.split("\n")[1:]:  # 跳过第一行（标题）
             line = line.strip()
+            # 跳过预期效果行（单独处理）
+            if re.search(r"^预期效果[:：]", line):
+                continue
             if line.startswith(("-", "•", "*", "·")) and len(line) > 3:
-                steps.append(line.lstrip("-•*· "))
+                step = line.lstrip("-•*· ")
+                # 去掉 markdown bold
+                step = re.sub(r"\*\*", "", step)
+                steps.append(step)
             elif re.match(r"^\d+[\.\)]\s", line):
-                steps.append(re.sub(r"^\d+[\.\)]\s*", "", line))
+                step = re.sub(r"^\d+[\.\)]\s*", "", line)
+                step = re.sub(r"\*\*", "", step)
+                steps.append(step)
 
         # 提取时间线
         timeline = "本周"
@@ -237,13 +264,16 @@ def _parse_action_items(text: str) -> list[ActionItem]:
         # 提取预期效果
         expected = ""
         for line in section.split("\n"):
-            if re.search(r"预期|效果|expect|提升|改善|降低", line, re.IGNORECASE):
+            if re.search(r"预期[效果]|expect", line, re.IGNORECASE):
                 expected = line.strip().lstrip("-•*· ")
+                # 清理前缀
+                expected = re.sub(r"^预期效果[:：]\s*", "", expected)
+                expected = re.sub(r"\*\*", "", expected)
                 break
         if not expected:
-            expected = f"执行后预计改善相关维度评分"
+            expected = "执行后预计改善相关维度评分"
 
-        if title:
+        if title and len(title) >= 3:
             items.append(ActionItem(
                 priority=priority,
                 title=title,
