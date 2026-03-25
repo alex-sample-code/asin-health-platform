@@ -1,0 +1,549 @@
+{
+  "Home & Kitchen > Kitchen Utensils": [
+    {
+      "asin": "COMP_HOME_000",
+      "category": "Home & Kitchen > Kitchen Utensils",
+      "avg_price": 36.13,
+      "avg_rating": 4.6,
+      "review_count": 2144,
+      "bsr": 16919,
+      "monthly_est_sales": 1485
+    },
+    {
+      "asin": "COMP_HOME_001",
+      "category": "Home & Kitchen > Kitchen Utensils",
+      "avg_price": 55.86,
+      "avg_rating": 4.8,
+      "review_count": 632,
+      "bsr": 34481,
+      "monthly_est_sales": 846
+    },
+    {
+      "asin": "COMP_HOME_002",
+      "category": "Home & Kitchen > Kitchen Utensils",
+      "avg_price": 90.34,
+      "avg_rating": 4.5,
+      "review_count": 1710,
+      "bsr": 19885,
+      "monthly_est_sales": 2976
+    },
+    {
+      "asin": "COMP_HOME_003",
+      "category": "Home & Kitchen > Kitchen Utensils",
+      "avg_price": 89.29,
+      "avg_rating": 4.2,
+      "review_count": 3582,
+      "bsr": 14727,
+      "monthly_est_sales": 2026
+    },
+    {
+      "asin": "COMP_HOME_004",
+      "category": "Home & Kitchen > Kitchen Utensils",
+      "avg_price": 29.0,
+      "avg_rating": 3.7,
+      "review_count": 1799,
+      "bsr": 1914,
+      "monthly_est_sales": 2949
+    },
+    {
+      "asin": "COMP_HOME_005",
+      "category": "Home & Kitchen > Kitchen Utensils",
+      "avg_price": 48.48,
+      "avg_rating": 4.5,
+      "review_count": 1911,
+      "bsr": 14641,
+      "monthly_est_sales": 738
+    },
+    {
+      "asin": "COMP_HOME_006",
+      "category": "Home & Kitchen > Kitchen Utensils",
+      "avg_price": 21.15,
+      "avg_rating": 4.4,
+      "review_count": 2049,
+      "bsr": 65072,
+      "monthly_est_sales": 1244
+    }
+  ],
+  "Home & Kitchen > Storage & Organization": [
+    {
+      "asin": "COMP_HOME_000",
+      "category": "Home & Kitchen > Storage & Organization",
+      "avg_price": 72.69,
+      "avg_rating": 4.6,
+      "review_count": 3494,
+      "bsr": 62021,
+      "monthly_est_sales": 543
+    },
+    {
+      "asin": "COMP_HOME_001",
+      "category": "Home & Kitchen > Storage & Organization",
+      "avg_price": 56.05,
+      "avg_rating": 4.5,
+      "review_count": 1071,
+      "bsr": 28195,
+      "monthly_est_sales": 3134
+    },
+    {
+      "asin": "COMP_HOME_002",
+      "category": "Home & Kitchen > Storage & Organization",
+      "avg_price": 75.35,
+      "avg_rating": 3.7,
+      "review_count": 1293,
+      "bsr": 10514,
+      "monthly_est_sales": 1060
+    },
+    {
+      "asin": "COMP_HOME_003",
+      "category": "Home & Kitchen > Storage & Organization",
+      "avg_price": 16.89,
+      "avg_rating": 4.2,
+      "review_count": 295,
+      "bsr": 75525,
+      "monthly_est_sales": 4599
+    },
+    {
+      "asin": "COMP_HOME_004",
+      "category": "Home & Kitchen > Storage & Organization",
+      "avg_price": 29.44,
+      "avg_rating": 4.5,
+      "review_count": 4206,
+      "bsr": 63685,
+      "monthly_est_sales": 4890
+    },
+    {
+      "asin": "COMP_HOME_005",
+      "category": "Home & Kitchen > Storage & Organization",
+      "avg_price": 61.3,
+      "avg_rating": 4.7,
+      "review_count": 1742,
+      "bsr": 6622,
+      "monthly_est_sales": 617
+    }
+  ],
+  "Electronics > Phone Accessories": [
+    {
+      "asin": "COMP_ELEC_000",
+      "category": "Electronics > Phone Accessories",
+      "avg_price": 56.46,
+      "avg_rating": 4.3,
+      "review_count": 725,
+      "bsr": 74196,
+      "monthly_est_sales": 3563
+    },
+    {
+      "asin": "COMP_ELEC_001",
+      "category": "Electronics > Phone Accessories",
+      "avg_price": 83.97,
+      "avg_rating": 3.5,
+      "review_count": 196,
+      "bsr": 67367,
+      "monthly_est_sales": 1355
+    },
+    {
+      "asin": "COMP_ELEC_002",
+      "category": "Electronics > Phone Accessories",
+      "avg_price": 60.57,
+      "avg_rating": 4.0,
+      "review_count": 4198,
+      "bsr": 15996,
+      "monthly_est_sales": 4569
+    },
+    {
+      "asin": "COMP_ELEC_003",
+      "category": "Electronics > Phone Accessories",
+      "avg_price": 20.73,
+      "avg_rating": 3.8,
+      "review_count": 2653,
+      "bsr": 68566,
+      "monthly_est_sales": 3554
+    },
+    {
+      "asin": "COMP_ELEC_004",
+      "category": "Electronics > Phone Accessories",
+      "avg_price": 26.13,
+      "avg_rating": 4.2,
+      "review_count": 3074,
+      "bsr": 66755,
+      "monthly_est_sales": 4696
+    },
+    {
+      "asin": "COMP_ELEC_005",
+      "category": "Electronics > Phone Accessories",
+      "avg_price": 10.75,
+      "avg_rating": 4.8,
+      "review_count": 4348,
+      "bsr": 59732,
+      "monthly_est_sales": 4081
+    }
+  ],
+  "Electronics > Computer Accessories": [
+    {
+      "asin": "COMP_ELEC_000",
+      "category": "Electronics > Computer Accessories",
+      "avg_price": 95.61,
+      "avg_rating": 4.3,
+      "review_count": 4148,
+      "bsr": 5244,
+      "monthly_est_sales": 3846
+    },
+    {
+      "asin": "COMP_ELEC_001",
+      "category": "Electronics > Computer Accessories",
+      "avg_price": 46.71,
+      "avg_rating": 4.1,
+      "review_count": 471,
+      "bsr": 23881,
+      "monthly_est_sales": 2389
+    },
+    {
+      "asin": "COMP_ELEC_002",
+      "category": "Electronics > Computer Accessories",
+      "avg_price": 35.53,
+      "avg_rating": 3.8,
+      "review_count": 1348,
+      "bsr": 26666,
+      "monthly_est_sales": 2921
+    },
+    {
+      "asin": "COMP_ELEC_003",
+      "category": "Electronics > Computer Accessories",
+      "avg_price": 94.15,
+      "avg_rating": 4.2,
+      "review_count": 3175,
+      "bsr": 36124,
+      "monthly_est_sales": 4312
+    },
+    {
+      "asin": "COMP_ELEC_004",
+      "category": "Electronics > Computer Accessories",
+      "avg_price": 34.6,
+      "avg_rating": 4.4,
+      "review_count": 4832,
+      "bsr": 24848,
+      "monthly_est_sales": 3964
+    },
+    {
+      "asin": "COMP_ELEC_005",
+      "category": "Electronics > Computer Accessories",
+      "avg_price": 12.64,
+      "avg_rating": 3.7,
+      "review_count": 381,
+      "bsr": 64013,
+      "monthly_est_sales": 3152
+    },
+    {
+      "asin": "COMP_ELEC_006",
+      "category": "Electronics > Computer Accessories",
+      "avg_price": 33.01,
+      "avg_rating": 3.7,
+      "review_count": 1302,
+      "bsr": 35052,
+      "monthly_est_sales": 4641
+    },
+    {
+      "asin": "COMP_ELEC_007",
+      "category": "Electronics > Computer Accessories",
+      "avg_price": 62.46,
+      "avg_rating": 3.5,
+      "review_count": 2517,
+      "bsr": 61269,
+      "monthly_est_sales": 3269
+    },
+    {
+      "asin": "COMP_ELEC_008",
+      "category": "Electronics > Computer Accessories",
+      "avg_price": 58.68,
+      "avg_rating": 4.2,
+      "review_count": 1746,
+      "bsr": 53146,
+      "monthly_est_sales": 1658
+    },
+    {
+      "asin": "COMP_ELEC_009",
+      "category": "Electronics > Computer Accessories",
+      "avg_price": 68.27,
+      "avg_rating": 4.3,
+      "review_count": 932,
+      "bsr": 44522,
+      "monthly_est_sales": 3308
+    }
+  ],
+  "Sports & Outdoors > Fitness Equipment": [
+    {
+      "asin": "COMP_SPOR_000",
+      "category": "Sports & Outdoors > Fitness Equipment",
+      "avg_price": 78.82,
+      "avg_rating": 4.0,
+      "review_count": 4349,
+      "bsr": 14482,
+      "monthly_est_sales": 2337
+    },
+    {
+      "asin": "COMP_SPOR_001",
+      "category": "Sports & Outdoors > Fitness Equipment",
+      "avg_price": 14.87,
+      "avg_rating": 3.8,
+      "review_count": 2271,
+      "bsr": 71118,
+      "monthly_est_sales": 2165
+    },
+    {
+      "asin": "COMP_SPOR_002",
+      "category": "Sports & Outdoors > Fitness Equipment",
+      "avg_price": 89.88,
+      "avg_rating": 4.8,
+      "review_count": 2707,
+      "bsr": 32176,
+      "monthly_est_sales": 3551
+    },
+    {
+      "asin": "COMP_SPOR_003",
+      "category": "Sports & Outdoors > Fitness Equipment",
+      "avg_price": 50.92,
+      "avg_rating": 4.6,
+      "review_count": 1592,
+      "bsr": 23091,
+      "monthly_est_sales": 3512
+    },
+    {
+      "asin": "COMP_SPOR_004",
+      "category": "Sports & Outdoors > Fitness Equipment",
+      "avg_price": 27.11,
+      "avg_rating": 3.8,
+      "review_count": 3694,
+      "bsr": 8129,
+      "monthly_est_sales": 4251
+    },
+    {
+      "asin": "COMP_SPOR_005",
+      "category": "Sports & Outdoors > Fitness Equipment",
+      "avg_price": 70.26,
+      "avg_rating": 3.6,
+      "review_count": 3932,
+      "bsr": 47602,
+      "monthly_est_sales": 4958
+    },
+    {
+      "asin": "COMP_SPOR_006",
+      "category": "Sports & Outdoors > Fitness Equipment",
+      "avg_price": 44.0,
+      "avg_rating": 4.5,
+      "review_count": 2436,
+      "bsr": 40595,
+      "monthly_est_sales": 3572
+    }
+  ],
+  "Beauty & Personal Care > Skin Care": [
+    {
+      "asin": "COMP_BEAU_000",
+      "category": "Beauty & Personal Care > Skin Care",
+      "avg_price": 43.58,
+      "avg_rating": 4.4,
+      "review_count": 4844,
+      "bsr": 8187,
+      "monthly_est_sales": 4397
+    },
+    {
+      "asin": "COMP_BEAU_001",
+      "category": "Beauty & Personal Care > Skin Care",
+      "avg_price": 72.43,
+      "avg_rating": 4.5,
+      "review_count": 2920,
+      "bsr": 62181,
+      "monthly_est_sales": 1106
+    },
+    {
+      "asin": "COMP_BEAU_002",
+      "category": "Beauty & Personal Care > Skin Care",
+      "avg_price": 14.42,
+      "avg_rating": 3.6,
+      "review_count": 1003,
+      "bsr": 13071,
+      "monthly_est_sales": 2203
+    },
+    {
+      "asin": "COMP_BEAU_003",
+      "category": "Beauty & Personal Care > Skin Care",
+      "avg_price": 88.19,
+      "avg_rating": 4.7,
+      "review_count": 1416,
+      "bsr": 28558,
+      "monthly_est_sales": 2880
+    },
+    {
+      "asin": "COMP_BEAU_004",
+      "category": "Beauty & Personal Care > Skin Care",
+      "avg_price": 90.49,
+      "avg_rating": 4.7,
+      "review_count": 3472,
+      "bsr": 2007,
+      "monthly_est_sales": 3188
+    },
+    {
+      "asin": "COMP_BEAU_005",
+      "category": "Beauty & Personal Care > Skin Care",
+      "avg_price": 92.95,
+      "avg_rating": 4.2,
+      "review_count": 2932,
+      "bsr": 23257,
+      "monthly_est_sales": 1556
+    },
+    {
+      "asin": "COMP_BEAU_006",
+      "category": "Beauty & Personal Care > Skin Care",
+      "avg_price": 89.94,
+      "avg_rating": 4.3,
+      "review_count": 3017,
+      "bsr": 3500,
+      "monthly_est_sales": 4978
+    },
+    {
+      "asin": "COMP_BEAU_007",
+      "category": "Beauty & Personal Care > Skin Care",
+      "avg_price": 70.45,
+      "avg_rating": 3.9,
+      "review_count": 3612,
+      "bsr": 2935,
+      "monthly_est_sales": 2322
+    }
+  ],
+  "Toys & Games > Building Sets": [
+    {
+      "asin": "COMP_TOYS_000",
+      "category": "Toys & Games > Building Sets",
+      "avg_price": 56.27,
+      "avg_rating": 4.8,
+      "review_count": 4423,
+      "bsr": 52260,
+      "monthly_est_sales": 643
+    },
+    {
+      "asin": "COMP_TOYS_001",
+      "category": "Toys & Games > Building Sets",
+      "avg_price": 57.98,
+      "avg_rating": 4.1,
+      "review_count": 2697,
+      "bsr": 58123,
+      "monthly_est_sales": 2690
+    },
+    {
+      "asin": "COMP_TOYS_002",
+      "category": "Toys & Games > Building Sets",
+      "avg_price": 49.71,
+      "avg_rating": 4.2,
+      "review_count": 1114,
+      "bsr": 57158,
+      "monthly_est_sales": 1849
+    },
+    {
+      "asin": "COMP_TOYS_003",
+      "category": "Toys & Games > Building Sets",
+      "avg_price": 81.63,
+      "avg_rating": 4.3,
+      "review_count": 147,
+      "bsr": 5258,
+      "monthly_est_sales": 4255
+    },
+    {
+      "asin": "COMP_TOYS_004",
+      "category": "Toys & Games > Building Sets",
+      "avg_price": 62.29,
+      "avg_rating": 4.1,
+      "review_count": 1967,
+      "bsr": 6696,
+      "monthly_est_sales": 1908
+    },
+    {
+      "asin": "COMP_TOYS_005",
+      "category": "Toys & Games > Building Sets",
+      "avg_price": 48.16,
+      "avg_rating": 4.8,
+      "review_count": 337,
+      "bsr": 61468,
+      "monthly_est_sales": 3937
+    },
+    {
+      "asin": "COMP_TOYS_006",
+      "category": "Toys & Games > Building Sets",
+      "avg_price": 34.75,
+      "avg_rating": 4.1,
+      "review_count": 2104,
+      "bsr": 28685,
+      "monthly_est_sales": 1698
+    },
+    {
+      "asin": "COMP_TOYS_007",
+      "category": "Toys & Games > Building Sets",
+      "avg_price": 36.77,
+      "avg_rating": 3.5,
+      "review_count": 3789,
+      "bsr": 7536,
+      "monthly_est_sales": 2725
+    },
+    {
+      "asin": "COMP_TOYS_008",
+      "category": "Toys & Games > Building Sets",
+      "avg_price": 40.42,
+      "avg_rating": 4.5,
+      "review_count": 952,
+      "bsr": 26648,
+      "monthly_est_sales": 1792
+    }
+  ],
+  "Office Products > Desk Accessories": [
+    {
+      "asin": "COMP_OFFI_000",
+      "category": "Office Products > Desk Accessories",
+      "avg_price": 83.39,
+      "avg_rating": 4.7,
+      "review_count": 2433,
+      "bsr": 30298,
+      "monthly_est_sales": 830
+    },
+    {
+      "asin": "COMP_OFFI_001",
+      "category": "Office Products > Desk Accessories",
+      "avg_price": 98.35,
+      "avg_rating": 4.1,
+      "review_count": 1148,
+      "bsr": 64309,
+      "monthly_est_sales": 2465
+    },
+    {
+      "asin": "COMP_OFFI_002",
+      "category": "Office Products > Desk Accessories",
+      "avg_price": 66.02,
+      "avg_rating": 4.0,
+      "review_count": 1885,
+      "bsr": 13161,
+      "monthly_est_sales": 4204
+    },
+    {
+      "asin": "COMP_OFFI_003",
+      "category": "Office Products > Desk Accessories",
+      "avg_price": 98.15,
+      "avg_rating": 4.0,
+      "review_count": 2158,
+      "bsr": 3153,
+      "monthly_est_sales": 1290
+    },
+    {
+      "asin": "COMP_OFFI_004",
+      "category": "Office Products > Desk Accessories",
+      "avg_price": 45.21,
+      "avg_rating": 3.7,
+      "review_count": 448,
+      "bsr": 16536,
+      "monthly_est_sales": 2817
+    },
+    {
+      "asin": "COMP_OFFI_005",
+      "category": "Office Products > Desk Accessories",
+      "avg_price": 77.08,
+      "avg_rating": 4.6,
+      "review_count": 1296,
+      "bsr": 50453,
+      "monthly_est_sales": 1800
+    }
+  ]
+}

@@ -1,0 +1,902 @@
+[
+  {
+    "asin": "B000000071",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "mature",
+    "days_since_launch": 918,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000049",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 275,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000008",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "new",
+    "days_since_launch": 36,
+    "anomaly_desc": "多维低分+A-to-Z投诉"
+  },
+  {
+    "asin": "B000000044",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Toys & Games > Building Sets",
+    "lifecycle": "growth",
+    "days_since_launch": 345,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000073",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "mature",
+    "days_since_launch": 866,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000004",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "new",
+    "days_since_launch": 76,
+    "anomaly_desc": "退货率上升+单一原因集中"
+  },
+  {
+    "asin": "B000000021",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "new",
+    "days_since_launch": 12,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000064",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "mature",
+    "days_since_launch": 1105,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000046",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 225,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000047",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "growth",
+    "days_since_launch": 216,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000011",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "new",
+    "days_since_launch": 35,
+    "anomaly_desc": "IPI低分+仓储费暴涨"
+  },
+  {
+    "asin": "B000000036",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 173,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000028",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 130,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000039",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 118,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000014",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "new",
+    "days_since_launch": 61,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000040",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "growth",
+    "days_since_launch": 106,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000038",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "growth",
+    "days_since_launch": 202,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000093",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "decline",
+    "days_since_launch": 846,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000032",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "growth",
+    "days_since_launch": 279,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000019",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "new",
+    "days_since_launch": 52,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000022",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "new",
+    "days_since_launch": 75,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000081",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "mature",
+    "days_since_launch": 928,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000002",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "new",
+    "days_since_launch": 38,
+    "anomaly_desc": "库存充足+销量骤降+Listing被压制"
+  },
+  {
+    "asin": "B000000092",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "decline",
+    "days_since_launch": 207,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000053",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Toys & Games > Building Sets",
+    "lifecycle": "growth",
+    "days_since_launch": 171,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000061",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "mature",
+    "days_since_launch": 480,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000042",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 123,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000091",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "decline",
+    "days_since_launch": 802,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000074",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "mature",
+    "days_since_launch": 480,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000037",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "growth",
+    "days_since_launch": 284,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000063",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "mature",
+    "days_since_launch": 830,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000033",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "growth",
+    "days_since_launch": 197,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000020",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "new",
+    "days_since_launch": 84,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000041",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "growth",
+    "days_since_launch": 295,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000034",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 126,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000050",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 160,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000089",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "decline",
+    "days_since_launch": 546,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000080",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "mature",
+    "days_since_launch": 497,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000065",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "mature",
+    "days_since_launch": 878,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000067",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "mature",
+    "days_since_launch": 1006,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000058",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "mature",
+    "days_since_launch": 1062,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000070",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "mature",
+    "days_since_launch": 1146,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000027",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "growth",
+    "days_since_launch": 206,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000018",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "new",
+    "days_since_launch": 55,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000029",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Toys & Games > Building Sets",
+    "lifecycle": "growth",
+    "days_since_launch": 141,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000016",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "new",
+    "days_since_launch": 34,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000098",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "decline",
+    "days_since_launch": 419,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000000",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "new",
+    "days_since_launch": 88,
+    "anomaly_desc": "销量下降+差评上升+退货率高"
+  },
+  {
+    "asin": "B000000076",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "mature",
+    "days_since_launch": 611,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000066",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "mature",
+    "days_since_launch": 885,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000003",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "new",
+    "days_since_launch": 24,
+    "anomaly_desc": "销量上升+毛利率下降"
+  },
+  {
+    "asin": "B000000025",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 275,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000079",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "mature",
+    "days_since_launch": 436,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000030",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 232,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000075",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "mature",
+    "days_since_launch": 1192,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000026",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "growth",
+    "days_since_launch": 125,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000010",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Toys & Games > Building Sets",
+    "lifecycle": "new",
+    "days_since_launch": 76,
+    "anomaly_desc": "季节性库存断货"
+  },
+  {
+    "asin": "B000000015",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "new",
+    "days_since_launch": 42,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000072",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "mature",
+    "days_since_launch": 979,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000048",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Toys & Games > Building Sets",
+    "lifecycle": "growth",
+    "days_since_launch": 309,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000069",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "mature",
+    "days_since_launch": 522,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000005",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Toys & Games > Building Sets",
+    "lifecycle": "new",
+    "days_since_launch": 82,
+    "anomaly_desc": "广告依赖过高+ACOS失控"
+  },
+  {
+    "asin": "B000000062",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "mature",
+    "days_since_launch": 811,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000001",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "new",
+    "days_since_launch": 10,
+    "anomaly_desc": "广告费暴涨+转化率下降+CPC上升"
+  },
+  {
+    "asin": "B000000087",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "decline",
+    "days_since_launch": 323,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000085",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "decline",
+    "days_since_launch": 608,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000056",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "mature",
+    "days_since_launch": 907,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000009",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "new",
+    "days_since_launch": 78,
+    "anomaly_desc": "价格战+毛利转负"
+  },
+  {
+    "asin": "B000000078",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "mature",
+    "days_since_launch": 453,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000088",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "decline",
+    "days_since_launch": 430,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000035",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 363,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000023",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "new",
+    "days_since_launch": 55,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000090",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "decline",
+    "days_since_launch": 802,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000017",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "new",
+    "days_since_launch": 20,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000057",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "mature",
+    "days_since_launch": 932,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000068",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "mature",
+    "days_since_launch": 1020,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000077",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "mature",
+    "days_since_launch": 612,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000096",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "decline",
+    "days_since_launch": 272,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000099",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "decline",
+    "days_since_launch": 784,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000013",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "new",
+    "days_since_launch": 7,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000043",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 251,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000051",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "growth",
+    "days_since_launch": 136,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000007",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "new",
+    "days_since_launch": 18,
+    "anomaly_desc": "新品广告烧钱+无转化"
+  },
+  {
+    "asin": "B000000094",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Storage & Organization",
+    "lifecycle": "decline",
+    "days_since_launch": 434,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000082",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Toys & Games > Building Sets",
+    "lifecycle": "mature",
+    "days_since_launch": 637,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000083",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Computer Accessories",
+    "lifecycle": "mature",
+    "days_since_launch": 582,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000086",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "decline",
+    "days_since_launch": 648,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000006",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Home & Kitchen > Kitchen Utensils",
+    "lifecycle": "new",
+    "days_since_launch": 11,
+    "anomaly_desc": "BSR暴跌+库存积压"
+  },
+  {
+    "asin": "B000000059",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "mature",
+    "days_since_launch": 1064,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000097",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "decline",
+    "days_since_launch": 485,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000054",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Toys & Games > Building Sets",
+    "lifecycle": "growth",
+    "days_since_launch": 122,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000045",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 324,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000055",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Office Products > Desk Accessories",
+    "lifecycle": "mature",
+    "days_since_launch": 756,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000084",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "mature",
+    "days_since_launch": 1096,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000095",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "decline",
+    "days_since_launch": 232,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000012",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "new",
+    "days_since_launch": 82,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000024",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Sports & Outdoors > Fitness Equipment",
+    "lifecycle": "new",
+    "days_since_launch": 77,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000052",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 146,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000060",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Beauty & Personal Care > Skin Care",
+    "lifecycle": "mature",
+    "days_since_launch": 1153,
+    "anomaly_desc": null
+  },
+  {
+    "asin": "B000000031",
+    "seller_id": "SELLER001",
+    "marketplace_id": "ATVPDKIKX0DER",
+    "sub_category": "Electronics > Phone Accessories",
+    "lifecycle": "growth",
+    "days_since_launch": 276,
+    "anomaly_desc": null
+  }
+]
