@@ -138,8 +138,50 @@ def _identify_problems(score_data: dict[str, Any]) -> list[ProblemDimension]:
     return problems
 
 
+def _extract_json(text: str) -> Any | None:
+    """从文本中提取 JSON 对象或数组，支持 markdown 代码块包裹。"""
+    # 尝试整段解析
+    try:
+        return json.loads(text.strip())
+    except (json.JSONDecodeError, ValueError):
+        pass
+    # 尝试从 ```json ... ``` 中提取
+    m = re.search(r"```(?:json)?\s*\n?([\s\S]*?)\n?```", text)
+    if m:
+        try:
+            return json.loads(m.group(1).strip())
+        except (json.JSONDecodeError, ValueError):
+            pass
+    # 尝试找第一个 [ 或 { 开始的 JSON
+    for start_char, end_char in [("[", "]"), ("{", "}")]:
+        start = text.find(start_char)
+        if start == -1:
+            continue
+        # 从后往前找匹配的闭合
+        end = text.rfind(end_char)
+        if end > start:
+            try:
+                return json.loads(text[start:end + 1])
+            except (json.JSONDecodeError, ValueError):
+                pass
+    return None
+
+
 def _parse_root_causes(text: str) -> list[RootCause]:
-    """从 Agent 返回文本中解析根因列表。降级时把整段放 hypothesis。"""
+    """从 Agent 返回文本中解析根因列表。优先 JSON，fallback 正则。"""
+    # 尝试 JSON 解析
+    parsed = _extract_json(text)
+    if isinstance(parsed, list):
+        causes = []
+        for item in parsed[:3]:
+            if isinstance(item, dict) and "hypothesis" in item:
+                causes.append(RootCause(
+                    hypothesis=item["hypothesis"],
+                    confidence=item.get("confidence", "medium"),
+                    evidence=item.get("evidence", []),
+                ))
+        if causes:
+            return causes
     causes: list[RootCause] = []
 
     # 尝试按编号分段
@@ -185,7 +227,26 @@ def _parse_root_causes(text: str) -> list[RootCause]:
 
 
 def _parse_action_items(text: str) -> list[ActionItem]:
-    """从 Agent 返回文本中解析行动建议列表。"""
+    """从 Agent 返回文本中解析行动建议列表。优先 JSON，fallback 正则。"""
+    # 尝试 JSON 解析
+    parsed = _extract_json(text)
+    if isinstance(parsed, list):
+        items = []
+        for item in parsed:
+            if isinstance(item, dict) and "title" in item:
+                items.append(ActionItem(
+                    priority=item.get("priority", "P2"),
+                    title=item["title"],
+                    steps=item.get("steps", ["参考 AI 分析结果执行"]),
+                    expected_effect=item.get("expected_effect", "执行后预计改善相关维度评分"),
+                    timeline=item.get("timeline", "本周"),
+                ))
+        if items:
+            priority_order = {"P0": 0, "P1": 1, "P2": 2, "P3": 3}
+            items.sort(key=lambda x: priority_order.get(x.priority, 9))
+            return items
+
+    # Fallback: 正则解析
     items: list[ActionItem] = []
 
     # 按 P0-P3 标记或编号分段
@@ -295,7 +356,18 @@ def _parse_action_items(text: str) -> list[ActionItem]:
 
 
 def _parse_benchmark(text: str) -> BenchmarkComparison:
-    """从 Agent 返回文本中解析竞品对标信息。"""
+    """从 Agent 返回文本中解析竞品对标信息。优先 JSON，fallback 正则。"""
+    # 尝试 JSON 解析
+    parsed = _extract_json(text)
+    if isinstance(parsed, dict):
+        if "category_position" in parsed:
+            return BenchmarkComparison(
+                category_position=parsed.get("category_position", "中等"),
+                weak_vs_benchmark=parsed.get("weak_vs_benchmark", ["参考 AI 详细分析"])[:5],
+                competitor_insights=parsed.get("competitor_insights", "暂无竞品洞察"),
+            )
+
+    # Fallback: 正则解析
     # 提取类目位置
     position = "中等"
     if re.search(r"领先|优秀|top|头部", text, re.IGNORECASE):
