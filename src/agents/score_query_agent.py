@@ -1,6 +1,6 @@
 """评分查询 Agent — 负责查询和解读 ASIN 健康度评分。
 
-使用 Nova Pro 模型，工具：get_asin_score, get_score_summary, list_asins_by_health
+使用 Claude Sonnet 4.6 模型，工具：get_asin_score, get_score_summary, list_asins_by_health
 """
 
 from __future__ import annotations
@@ -32,10 +32,10 @@ SYSTEM_PROMPT = """你是 ASIN 健康度评分查询专家。你的职责是：
 
 
 def create_score_query_agent() -> Agent:
-    """创建评分查询 Agent（Nova Pro）。"""
+    """创建评分查询 Agent（Claude Sonnet 4.6）。"""
     model = BedrockModel(
-        model_id="us.amazon.nova-pro-v1:0",
-        max_tokens=2048,
+        model_id="us.anthropic.claude-sonnet-4-6",
+        max_tokens=4096,
         region_name="us-east-1",
     )
     return Agent(

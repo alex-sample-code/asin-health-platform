@@ -1,6 +1,6 @@
 """竞品分析 Agent — 类目基准对比和竞品分析。
 
-使用 Nova Pro 模型，工具：get_category_benchmark, get_competitor_list, get_asin_score, get_asin_metrics
+使用 Claude Sonnet 4.6 模型，工具：get_category_benchmark, get_competitor_list, get_asin_score, get_asin_metrics
 """
 
 from __future__ import annotations
@@ -36,10 +36,10 @@ SYSTEM_PROMPT = """你是 ASIN 竞品分析专家。你的职责是：
 
 
 def create_competitor_agent() -> Agent:
-    """创建竞品分析 Agent（Nova Pro）。"""
+    """创建竞品分析 Agent（Claude Sonnet 4.6）。"""
     model = BedrockModel(
-        model_id="us.amazon.nova-pro-v1:0",
-        max_tokens=2048,
+        model_id="us.anthropic.claude-sonnet-4-6",
+        max_tokens=4096,
         region_name="us-east-1",
     )
     return Agent(

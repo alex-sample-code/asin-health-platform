@@ -1,6 +1,6 @@
 """知识检索 Agent — 运营知识库检索和问答。
 
-使用 Nova Pro 模型，工具：search_knowledge
+使用 Claude Sonnet 4.6 模型，工具：search_knowledge
 """
 
 from __future__ import annotations
@@ -29,10 +29,10 @@ SYSTEM_PROMPT = """你是 Amazon 运营知识库检索专家。你的职责是�
 
 
 def create_knowledge_agent() -> Agent:
-    """创建知识检索 Agent（Nova Pro）。"""
+    """创建知识检索 Agent（Claude Sonnet 4.6）。"""
     model = BedrockModel(
-        model_id="us.amazon.nova-pro-v1:0",
-        max_tokens=2048,
+        model_id="us.anthropic.claude-sonnet-4-6",
+        max_tokens=4096,
         region_name="us-east-1",
     )
     return Agent(
