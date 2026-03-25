@@ -142,31 +142,50 @@ def _identify_problems(score_data: dict[str, Any]) -> list[ProblemDimension]:
 
 
 def _extract_json(text: str) -> Any | None:
-    """从文本中提取 JSON 对象或数组，支持 markdown 代码块包裹。"""
-    # 尝试整段解析
+    """从文本中提取 JSON 对象或数组。
+    
+    处理多种 Agent 输出格式：
+    - 纯 JSON
+    - ```json ... ``` 代码块包裹
+    - 前缀文字 + JSON
+    - 嵌套代码块（Agent 输出被 str() 再包了一层）
+    """
+    if not text or not text.strip():
+        return None
+
+    # 1. 尝试整段解析
     try:
         return json.loads(text.strip())
     except (json.JSONDecodeError, ValueError):
         pass
-    # 尝试从 ```json ... ``` 中提取
-    m = re.search(r"```(?:json)?\s*\n?([\s\S]*?)\n?```", text)
-    if m:
+
+    # 2. 提取所有 ```json ... ``` 代码块，逐个尝试
+    code_blocks = re.findall(r"```(?:json)?\s*\n([\s\S]*?)\n\s*```", text)
+    for block in code_blocks:
+        stripped = block.strip()
         try:
-            return json.loads(m.group(1).strip())
+            return json.loads(stripped)
         except (json.JSONDecodeError, ValueError):
-            pass
-    # 尝试找第一个 [ 或 { 开始的 JSON
+            # 嵌套情况：block 内部还有 ```json
+            inner_blocks = re.findall(r"```(?:json)?\s*\n([\s\S]*?)\n\s*```", stripped)
+            for ib in inner_blocks:
+                try:
+                    return json.loads(ib.strip())
+                except (json.JSONDecodeError, ValueError):
+                    pass
+
+    # 3. 找第一个 [ 或 { 开始的有效 JSON（贪婪匹配到最后一个闭合符）
     for start_char, end_char in [("[", "]"), ("{", "}")]:
         start = text.find(start_char)
         if start == -1:
             continue
-        # 从后往前找匹配的闭合
         end = text.rfind(end_char)
         if end > start:
             try:
                 return json.loads(text[start:end + 1])
             except (json.JSONDecodeError, ValueError):
                 pass
+
     return None
 
 
@@ -205,6 +224,8 @@ def _parse_root_causes(text: str) -> list[RootCause]:
     """从 Agent 返回文本中解析根因列表。优先 JSON，fallback 正则。"""
     # 尝试 JSON 解析
     parsed = _extract_json(text)
+    logger.info(f"Root cause JSON extract: type={type(parsed).__name__}, "
+                f"is_list={isinstance(parsed, list)}, text_len={len(text)}")
     if isinstance(parsed, list):
         causes = []
         for item in parsed[:3]:
