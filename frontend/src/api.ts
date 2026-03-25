@@ -7,11 +7,12 @@ export async function fetchScores(params?: {
   lifecycle?: string;
   limit?: number;
 }): Promise<ScoreListResponse> {
-  const url = new URL(`${BASE_URL}/scores`);
-  if (params?.health_label) url.searchParams.set('health_label', params.health_label);
-  if (params?.lifecycle) url.searchParams.set('lifecycle', params.lifecycle);
-  if (params?.limit) url.searchParams.set('limit', String(params.limit));
-  const res = await fetch(url.toString());
+  const searchParams = new URLSearchParams();
+  if (params?.health_label) searchParams.set('health_label', params.health_label);
+  if (params?.lifecycle) searchParams.set('lifecycle', params.lifecycle);
+  if (params?.limit) searchParams.set('limit', String(params.limit));
+  const qs = searchParams.toString();
+  const res = await fetch(`${BASE_URL}/scores${qs ? '?' + qs : ''}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
