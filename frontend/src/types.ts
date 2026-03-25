@@ -58,7 +58,9 @@ export interface ActionItem {
 
 export interface BenchmarkComparison {
   category_position: string;
+  position_reason?: string;
   weak_vs_benchmark: string[];
+  strong_vs_benchmark?: string[];
   competitor_insights: string;
 }
 

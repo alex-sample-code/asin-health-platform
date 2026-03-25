@@ -60,7 +60,9 @@ class ActionItem(BaseModel):
 
 class BenchmarkComparison(BaseModel):
     category_position: str
+    position_reason: str = ""
     weak_vs_benchmark: list[str]
+    strong_vs_benchmark: list[str] = []
     competitor_insights: str
 
 
@@ -363,7 +365,9 @@ def _parse_benchmark(text: str) -> BenchmarkComparison:
         if "category_position" in parsed:
             return BenchmarkComparison(
                 category_position=parsed.get("category_position", "中等"),
+                position_reason=parsed.get("position_reason", ""),
                 weak_vs_benchmark=parsed.get("weak_vs_benchmark", ["参考 AI 详细分析"])[:5],
+                strong_vs_benchmark=parsed.get("strong_vs_benchmark", [])[:5],
                 competitor_insights=parsed.get("competitor_insights", "暂无竞品洞察"),
             )
 

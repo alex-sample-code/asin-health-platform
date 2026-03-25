@@ -303,15 +303,31 @@ export default function DiagnosisPanel({ asinId }: { asinId: string }) {
               <div className="mb-3">
                 <span className="text-gray-400 text-sm">类目位置: </span>
                 <span className="text-gray-200 font-medium">{benchmark.category_position}</span>
+                {benchmark.position_reason && (
+                  <span className="text-gray-500 text-sm ml-2">— {benchmark.position_reason}</span>
+                )}
               </div>
               {benchmark.weak_vs_benchmark.length > 0 && (
                 <div className="mb-3">
-                  <div className="text-gray-400 text-sm mb-1.5">弱于基准的维度:</div>
+                  <div className="text-gray-400 text-sm mb-1.5">⚠️ 弱于基准:</div>
                   <ul className="space-y-1">
                     {benchmark.weak_vs_benchmark.map((w, i) => (
                       <li key={i} className="text-orange-400 text-sm flex items-start gap-2">
                         <span className="mt-0.5">{'\u25BC'}</span>
                         <span>{w}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {benchmark.strong_vs_benchmark && benchmark.strong_vs_benchmark.length > 0 && (
+                <div className="mb-3">
+                  <div className="text-gray-400 text-sm mb-1.5">✅ 优于基准:</div>
+                  <ul className="space-y-1">
+                    {benchmark.strong_vs_benchmark.map((s, i) => (
+                      <li key={i} className="text-green-400 text-sm flex items-start gap-2">
+                        <span className="mt-0.5">{'\u25B2'}</span>
+                        <span>{s}</span>
                       </li>
                     ))}
                   </ul>

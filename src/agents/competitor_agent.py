@@ -22,18 +22,26 @@ SYSTEM_PROMPT = """你是 ASIN 竞品分析专家。
 ```json
 {
   "category_position": "领先/中等/落后",
-  "weak_vs_benchmark": ["维度1: 当前值 vs 基准值", "维度2: 当前值 vs 基准值"],
-  "competitor_insights": "2-3句话的竞争策略建议"
+  "position_reason": "一句话说明为什么是这个定位",
+  "weak_vs_benchmark": [
+    "维度名: 当前值 XX vs 类目中位数 YY（差距说明）"
+  ],
+  "strong_vs_benchmark": [
+    "维度名: 当前值 XX vs 类目中位数 YY（优势说明）"
+  ],
+  "competitor_insights": "3-5句话的深度竞争策略建议，包含具体可执行的方向"
 }
 ```
 
+weak_vs_benchmark 和 strong_vs_benchmark 各列出 2-4 个维度。
+competitor_insights 要有深度，结合具体数据给出差异化策略。
 不要输出任何 JSON 以外的内容。"""
 
 
 def create_competitor_agent() -> Agent:
-    """创建竞品分析 Agent（Amazon Nova Pro — 查数据对比，不需要深度推理）。"""
+    """创建竞品分析 Agent（Sonnet 4.6 — 需要深度分析能力）。"""
     model = BedrockModel(
-        model_id="us.amazon.nova-pro-v1:0",
+        model_id="us.anthropic.claude-sonnet-4-6",
         max_tokens=2048,
         region_name="us-east-1",
     )
