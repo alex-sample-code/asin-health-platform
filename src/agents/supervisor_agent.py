@@ -139,10 +139,8 @@ SUPERVISOR_PROMPT = """你是 ASIN 智能健康度分析平台的 Supervisor Age
 def create_supervisor_agent() -> Agent:
     """创建 Supervisor Agent（Claude Sonnet 4.6），5 个 sub-agent 注册为工具。"""
     model = BedrockModel(
-        model_config={
-            "model_id": "us.anthropic.claude-sonnet-4-6-v1",
-            "max_tokens": 4096,
-        },
+        model_id="us.anthropic.claude-sonnet-4-6",
+        max_tokens=4096,
         region_name="us-east-1",
     )
     return Agent(

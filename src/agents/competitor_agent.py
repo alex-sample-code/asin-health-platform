@@ -38,10 +38,8 @@ SYSTEM_PROMPT = """你是 ASIN 竞品分析专家。你的职责是：
 def create_competitor_agent() -> Agent:
     """创建竞品分析 Agent（Nova Pro）。"""
     model = BedrockModel(
-        model_config={
-            "model_id": "us.amazon.nova-pro-v1:0",
-            "max_tokens": 2048,
-        },
+        model_id="us.amazon.nova-pro-v1:0",
+        max_tokens=2048,
         region_name="us-east-1",
     )
     return Agent(

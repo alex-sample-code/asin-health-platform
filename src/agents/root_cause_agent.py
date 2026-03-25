@@ -43,10 +43,8 @@ SYSTEM_PROMPT = """你是 ASIN 健康度根因分析专家。你的职责是：
 def create_root_cause_agent() -> Agent:
     """创建根因分析 Agent（Claude Sonnet 4.6）。"""
     model = BedrockModel(
-        model_config={
-            "model_id": "us.anthropic.claude-sonnet-4-6-v1",
-            "max_tokens": 4096,
-        },
+        model_id="us.anthropic.claude-sonnet-4-6",
+        max_tokens=4096,
         region_name="us-east-1",
     )
     return Agent(

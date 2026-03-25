@@ -43,10 +43,8 @@ SYSTEM_PROMPT = """你是 ASIN 运营行动建议专家。你的职责是：
 def create_action_advisor_agent() -> Agent:
     """创建行动建议 Agent（Claude Sonnet 4.6）。"""
     model = BedrockModel(
-        model_config={
-            "model_id": "us.anthropic.claude-sonnet-4-6-v1",
-            "max_tokens": 4096,
-        },
+        model_id="us.anthropic.claude-sonnet-4-6",
+        max_tokens=4096,
         region_name="us-east-1",
     )
     return Agent(
