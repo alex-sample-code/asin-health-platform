@@ -1,4 +1,4 @@
-import type { AsinScore, ScoreListResponse } from './types';
+import type { AsinScore, DiagnosisResponse, ScoreListResponse } from './types';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -18,6 +18,12 @@ export async function fetchScores(params?: {
 
 export async function fetchScore(asinId: string): Promise<AsinScore> {
   const res = await fetch(`${BASE_URL}/scores/${asinId}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchDiagnosis(asinId: string): Promise<DiagnosisResponse> {
+  const res = await fetch(`${BASE_URL}/diagnosis/${asinId}`, { method: 'POST' });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }

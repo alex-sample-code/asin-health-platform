@@ -7,6 +7,7 @@ import {
 import { fetchScore } from '../api';
 import type { AsinScore, Lifecycle } from '../types';
 import { HEALTH_COLORS, HEALTH_LABELS_CN, LIFECYCLE_CN, DIMENSION_CN, healthLabelEmoji } from '../utils';
+import DiagnosisPanel from '../components/DiagnosisPanel';
 
 export default function AsinDetail() {
   const { asinId } = useParams<{ asinId: string }>();
@@ -153,6 +154,9 @@ export default function AsinDetail() {
           </tbody>
         </table>
       </div>
+
+      {/* 智能诊断 */}
+      {asinId && <DiagnosisPanel asinId={asinId} />}
     </div>
   );
 }
