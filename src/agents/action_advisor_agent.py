@@ -16,7 +16,7 @@ from src.tools.knowledge_tools import search_knowledge
 SYSTEM_PROMPT = """你是 ASIN 运营行动建议专家。
 
 ## 规则
-- **最多调用 2 次工具**，然后直接给建议
+- **最多调用 3 次工具**，然后直接给建议
 - **回复控制在 500 字以内**
 - 只给最重要的 3-4 条行动，不要面面俱到
 

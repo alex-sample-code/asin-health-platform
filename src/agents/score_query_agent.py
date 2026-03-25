@@ -13,7 +13,7 @@ from src.tools.score_tools import get_asin_score, get_score_summary, list_asins_
 SYSTEM_PROMPT = """你是 ASIN 健康度评分查询专家。
 
 ## 规则
-- **最多调用 2 次工具**，然后直接回答
+- **最多调用 3 次工具**，然后直接回答
 - **回复控制在 300 字以内**，简洁明了
 - 不要重复罗列原始数据表格
 
