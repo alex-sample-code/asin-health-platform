@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  background: #0f1117;
+  color: #e5e7eb;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1b23;
+}
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 3px;
+}
+
+/* Markdown in chat */
+.chat-markdown h1, .chat-markdown h2, .chat-markdown h3 {
+  color: #f3f4f6;
+  margin-top: 0.5em;
+  margin-bottom: 0.25em;
+}
+.chat-markdown p {
+  margin-bottom: 0.5em;
+}
+.chat-markdown ul, .chat-markdown ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+.chat-markdown code {
+  background: #1f2937;
+  padding: 0.125em 0.375em;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+.chat-markdown pre {
+  background: #1f2937;
+  padding: 0.75em;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+.chat-markdown pre code {
+  background: none;
+  padding: 0;
+}
