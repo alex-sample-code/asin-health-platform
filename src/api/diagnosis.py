@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor, Future
 from typing import Any, Generator
 
@@ -169,6 +170,37 @@ def _extract_json(text: str) -> Any | None:
     return None
 
 
+def _validate_root_cause(rc: dict) -> bool:
+    """校验根因 JSON 条目的完整性。"""
+    if not isinstance(rc, dict):
+        return False
+    if "hypothesis" not in rc or not rc["hypothesis"].strip():
+        return False
+    if rc.get("confidence") not in ("high", "medium", "low", None):
+        rc["confidence"] = "medium"
+    if not isinstance(rc.get("evidence", []), list):
+        rc["evidence"] = []
+    return True
+
+
+def _validate_action_item(item: dict) -> bool:
+    """校验行动建议 JSON 条目的完整性。"""
+    if not isinstance(item, dict):
+        return False
+    if "title" not in item or not item["title"].strip():
+        return False
+    if len(item["title"]) < 3:
+        return False
+    # 修正无效优先级
+    if item.get("priority") not in ("P0", "P1", "P2", "P3"):
+        item["priority"] = "P2"
+    # 修正无效时间线
+    valid_timelines = ("24h", "本周", "两周内", "本月")
+    if item.get("timeline") not in valid_timelines:
+        item["timeline"] = "本周"
+    return True
+
+
 def _parse_root_causes(text: str) -> list[RootCause]:
     """从 Agent 返回文本中解析根因列表。优先 JSON，fallback 正则。"""
     # 尝试 JSON 解析
@@ -176,7 +208,7 @@ def _parse_root_causes(text: str) -> list[RootCause]:
     if isinstance(parsed, list):
         causes = []
         for item in parsed[:3]:
-            if isinstance(item, dict) and "hypothesis" in item:
+            if isinstance(item, dict) and _validate_root_cause(item):
                 causes.append(RootCause(
                     hypothesis=item["hypothesis"],
                     confidence=item.get("confidence", "medium"),
@@ -235,7 +267,7 @@ def _parse_action_items(text: str) -> list[ActionItem]:
     if isinstance(parsed, list):
         items = []
         for item in parsed:
-            if isinstance(item, dict) and "title" in item:
+            if isinstance(item, dict) and _validate_action_item(item):
                 items.append(ActionItem(
                     priority=item.get("priority", "P2"),
                     title=item["title"],
@@ -415,6 +447,8 @@ def _parse_benchmark(text: str) -> BenchmarkComparison:
 
 def run_diagnosis(asin_id: str) -> DiagnosisResponse:
     """执行完整诊断流程，root_cause 和 competitor 并行调用。"""
+    from src.api.agent_logger import log_diagnosis_result
+    diag_start = time.time()
 
     # 1. 加载评分数据
     _, by_asin = _load_scores()
@@ -441,15 +475,48 @@ def run_diagnosis(asin_id: str) -> DiagnosisResponse:
 
     problem_summary = "、".join(f"{p.dimension_cn}({p.score}分)" for p in problems)
 
+    # 预加载指标摘要，注入到 Agent prompt 中（省掉 Agent 自己调 tool 拿数据）
+    from src.tools.metrics_tools import _load_daily, _load_profiles
+    profiles = _load_profiles()
+    profile = profiles.get(asin_id, {})
+    daily = _load_daily(asin_id)
+    metrics_ctx = ""
+    if daily:
+        recent = daily[-7:]
+        key_metrics = ["daily_orders", "cvr", "acos", "return_rate", "avg_rating", "gross_margin", "bsr"]
+        lines = []
+        for m in key_metrics:
+            vals = [d.get(m) for d in recent if d.get(m) is not None]
+            if vals:
+                lines.append(f"  {m}: 最新={vals[-1]:.2f}, 7天均={sum(vals)/len(vals):.2f}")
+        metrics_ctx = "\n".join(lines)
+
+    score_ctx = json.dumps({
+        "asin": asin_id,
+        "lifecycle": score_data.get("lifecycle", ""),
+        "category": profile.get("sub_category", ""),
+        "final_score": round(final_score, 1),
+        "health_label": health_label,
+        "dimension_scores": score_data.get("dimension_scores", {}),
+        "veto_applied": score_data.get("veto_applied", ""),
+    }, ensure_ascii=False)
+
+    context_block = f"""## 已有数据（无需调 tool 获取，直接分析）
+评分数据：{score_ctx}
+近7天指标摘要：
+{metrics_ctx}
+"""
+
     # 3. 并行调 root_cause Agent 和 competitor Agent
     def _call_root_cause() -> str:
         try:
             agent = _get_root_cause_agent()
             prompt = (
+                f"{context_block}\n"
                 f"分析 ASIN {asin_id} 的健康度异常。"
                 f"综合评分 {final_score:.1f}（{health_label}），"
                 f"异常维度：{problem_summary}。"
-                f"请给出根因假设和置信度（高/中/低），每个假设附上支撑证据。"
+                f"基于以上数据直接分析根因，只在需要更多细节时才调 tool。"
             )
             return str(agent(prompt))
         except Exception as e:
@@ -460,8 +527,9 @@ def run_diagnosis(asin_id: str) -> DiagnosisResponse:
         try:
             agent = _get_competitor_agent()
             prompt = (
+                f"{context_block}\n"
                 f"分析 ASIN {asin_id} 在类目中的竞争力位置，对比行业基准。"
-                f"重点关注弱于基准的维度。"
+                f"基于以上数据直接分析，只在需要类目基准数据时才调 tool。"
             )
             return str(agent(prompt))
         except Exception as e:
@@ -482,10 +550,11 @@ def run_diagnosis(asin_id: str) -> DiagnosisResponse:
         root_cause_summary = "; ".join(rc.hypothesis for rc in root_causes[:3])
         agent = _get_action_advisor_agent()
         prompt = (
+            f"{context_block}\n"
             f"为 ASIN {asin_id} 制定行动计划。"
             f"当前问题：综合评分 {final_score:.1f}，异常维度 {problem_summary}。"
             f"根因分析：{root_cause_summary}。"
-            f"请按 P0-P3 优先级给出建议，每条包含具体步骤、预期效果和时间线。"
+            f"基于以上数据直接给出建议，只在需要知识库参考时才调 tool。"
         )
         action_text = str(agent(prompt))
     except Exception as e:
@@ -500,7 +569,7 @@ def run_diagnosis(asin_id: str) -> DiagnosisResponse:
         f"主要问题维度：{problem_summary}。"
     )
 
-    return DiagnosisResponse(
+    result = DiagnosisResponse(
         asin=asin_id,
         health_label=health_label,
         final_score=round(final_score, 1),
@@ -510,6 +579,21 @@ def run_diagnosis(asin_id: str) -> DiagnosisResponse:
         action_plan=action_plan,
         benchmark=benchmark,
     )
+
+    # 记录诊断日志
+    diag_duration = time.time() - diag_start
+    log_diagnosis_result(
+        asin_id=asin_id,
+        duration_sec=diag_duration,
+        agents_used=["root_cause", "competitor", "action_advisor"],
+        root_causes_count=len(root_causes),
+        actions_count=len(action_plan),
+        success=True,
+    )
+    logger.info(f"Diagnosis {asin_id} completed in {diag_duration:.1f}s: "
+                f"{len(root_causes)} causes, {len(action_plan)} actions")
+
+    return result
 
 
 # ── SSE 流式诊断 ─────────────────────────────────────────────────────────

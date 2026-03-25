@@ -10,12 +10,13 @@ from strands.models import BedrockModel
 
 from src.tools.score_tools import get_asin_score
 from src.tools.metrics_tools import get_asin_metrics, get_metrics_trend
-from src.tools.knowledge_tools import search_knowledge
 
 SYSTEM_PROMPT = """你是 ASIN 健康度根因分析专家。
 
 ## 规则
 - **最多调用 3 次工具**，然后直接给结论
+- **不要重复调用同一个工具**，每个工具最多调 1 次
+- 如果 prompt 里已经提供了评分和指标数据，优先使用已有数据，减少 tool 调用
 - **严格按下面的 JSON 格式输出**，不要加任何前言或额外说明
 
 ## 输出格式（必须严格遵守，直接输出 JSON 数组）
@@ -42,7 +43,7 @@ def create_root_cause_agent() -> Agent:
     )
     return Agent(
         model=model,
-        tools=[get_asin_score, get_asin_metrics, get_metrics_trend, search_knowledge],
+        tools=[get_asin_score, get_asin_metrics, get_metrics_trend],
         system_prompt=SYSTEM_PROMPT,
         name="root_cause_agent",
         description="根因分析Agent，负责分析ASIN评分异常的根本原因",

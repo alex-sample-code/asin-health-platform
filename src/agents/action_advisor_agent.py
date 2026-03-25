@@ -8,7 +8,6 @@ from __future__ import annotations
 from strands import Agent
 from strands.models import BedrockModel
 
-from src.tools.score_tools import get_asin_score
 from src.tools.metrics_tools import get_asin_metrics
 from src.tools.benchmark_tools import get_category_benchmark
 from src.tools.knowledge_tools import search_knowledge
@@ -17,6 +16,8 @@ SYSTEM_PROMPT = """你是 ASIN 运营行动建议专家。
 
 ## 规则
 - **最多调用 3 次工具**，然后直接给建议
+- **不要重复调用同一个工具**
+- 如果 prompt 里已经提供了评分和指标数据，优先使用已有数据
 - **严格按下面的 JSON 格式输出**，不要加任何前言、过渡语或额外说明
 - 只给最重要的 3-5 条行动
 
@@ -46,7 +47,7 @@ def create_action_advisor_agent() -> Agent:
     )
     return Agent(
         model=model,
-        tools=[get_asin_score, get_asin_metrics, get_category_benchmark, search_knowledge],
+        tools=[get_asin_metrics, get_category_benchmark, search_knowledge],
         system_prompt=SYSTEM_PROMPT,
         name="action_advisor_agent",
         description="行动建议Agent，负责输出可执行的运营行动计划",
