@@ -147,11 +147,29 @@ def get_score(asin_id: str) -> ScoreResponse:
 
 
 @app.post("/diagnosis/{asin_id}", tags=["智能诊断"])
-def diagnose_asin(asin_id: str):
+def diagnose_asin(asin_id: str, force: bool = Query(False, description="强制重新诊断，忽略缓存")):
     """异步启动 ASIN 智能诊断，返回 task_id 用于轮询结果。
 
     流程：立即返回问题概览 + task_id → 前端轮询 GET /diagnosis/result/{task_id}
+    如果已有缓存诊断结果且 force=false，直接返回缓存。
     """
+    from src.api.diagnosis_cache import get_diagnosis, invalidate
+
+    # 检查缓存（非强制模式）
+    if not force:
+        cached = get_diagnosis(asin_id)
+        if cached:
+            return {
+                "task_id": "cached",
+                "status": "done",
+                "result": cached,
+                "from_cache": True,
+            }
+
+    # 强制模式：清除缓存
+    if force:
+        invalidate(asin_id)
+
     from src.tools.score_tools import _load_scores as _check_scores
     _, by_asin = _check_scores()
     if asin_id not in by_asin:

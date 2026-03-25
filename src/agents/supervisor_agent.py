@@ -36,6 +36,63 @@ def _get_agent(name: str) -> Agent:
 
 
 @tool
+def get_cached_diagnosis(asin_id: str) -> str:
+    """获取 ASIN 的已有诊断结果（缓存，24h 内有效）。
+
+    **优先调用此工具**。如果已有诊断结果，直接基于它回答，不需要再调其他分析工具。
+    只在缓存不存在时，才调 analyze_root_cause / suggest_actions 等工具。
+
+    Args:
+        asin_id: ASIN ID，如 B000000008
+    """
+    from src.api.diagnosis_cache import get_diagnosis
+    result = get_diagnosis(asin_id)
+    if result is None:
+        return f"ASIN {asin_id} 暂无诊断缓存，需要调用其他分析工具获取。"
+
+    import json
+    # 构建精简摘要
+    summary_parts = [
+        f"ASIN: {asin_id}",
+        f"评分: {result.get('final_score', '?')} ({result.get('health_label', '?')})",
+        f"摘要: {result.get('summary', '')}",
+    ]
+
+    rcs = result.get("root_causes", [])
+    if rcs:
+        summary_parts.append("根因:")
+        for rc in rcs[:3]:
+            summary_parts.append(f"  [{rc.get('confidence')}] {rc.get('hypothesis')}")
+
+    actions = result.get("action_plan", [])
+    if actions:
+        summary_parts.append("行动建议:")
+        for a in actions[:5]:
+            steps_str = "; ".join(a.get("steps", [])[:2])
+            summary_parts.append(f"  [{a.get('priority')}] {a.get('title')} — {steps_str}")
+
+    bm = result.get("benchmark")
+    if bm:
+        summary_parts.append(f"类目位置: {bm.get('category_position')}")
+        summary_parts.append(f"定位原因: {bm.get('position_reason', '')}")
+        weak = bm.get("weak_vs_benchmark", [])
+        strong = bm.get("strong_vs_benchmark", [])
+        if weak:
+            summary_parts.append(f"弱项: {', '.join(weak[:3])}")
+        if strong:
+            summary_parts.append(f"优势: {', '.join(strong[:3])}")
+        summary_parts.append(f"竞争策略: {bm.get('competitor_insights', '')}")
+
+    problems = result.get("problem_dimensions", [])
+    if problems:
+        summary_parts.append("问题维度:")
+        for p in problems:
+            summary_parts.append(f"  {p.get('dimension_cn', p.get('dimension'))}: {p.get('score')} ({p.get('severity')})")
+
+    return "\n".join(summary_parts)
+
+
+@tool
 def query_score(request: str) -> str:
     """查询 ASIN 健康度评分。
 
@@ -110,24 +167,29 @@ def search_knowledge_base(request: str) -> str:
 SUPERVISOR_PROMPT = """你是 ASIN 智能健康度分析平台的协调 Agent。
 
 ## 可用工具
-1. **query_score** — 查评分
-2. **analyze_root_cause** — 分析根因
-3. **suggest_actions** — 行动建议
-4. **analyze_competition** — 竞品对标
-5. **search_knowledge_base** — 知识检索
+1. **get_cached_diagnosis** — 获取已有诊断结果（⚠️ 必须优先调用）
+2. **query_score** — 查评分
+3. **analyze_root_cause** — 分析根因
+4. **suggest_actions** — 行动建议
+5. **analyze_competition** — 竞品对标
+6. **search_knowledge_base** — 知识检索
 
-## 规则
-- 根据问题复杂度选择 1-3 个工具，**不要全调**
-- 简单查询只调 1 个，复杂分析最多 3 个
-- **汇总回复控制在 600 字以内**
-- 直接给结论，不要重复 sub-agent 的原始输出
+## 核心规则
+- **提到具体 ASIN 时，必须先调 get_cached_diagnosis**
+- 如果缓存命中，直接基于诊断数据回答，**不要重复调分析工具**
+- 只在缓存不存在时才调 analyze_root_cause / suggest_actions / analyze_competition
+- 简单查评分用 query_score（不需要完整诊断）
 
 ## 路由策略
 - "查分数/评分" → query_score
-- "为什么/原因" → query_score + analyze_root_cause
-- "怎么改善/建议" → analyze_root_cause + suggest_actions
-- "全面分析" → query_score + analyze_root_cause + suggest_actions
-- "竞品/类目" → analyze_competition"""
+- "分析/诊断/问题/为什么" → get_cached_diagnosis（有缓存直接答，无缓存再调分析工具）
+- "怎么改善/建议" → get_cached_diagnosis（有缓存直接答，无缓存才调 suggest_actions）
+- "竞品/类目/竞争" → get_cached_diagnosis（有缓存直接答，无缓存才调 analyze_competition）
+- "知识/SOP/最佳实践" → search_knowledge_base
+
+## 输出
+- 汇总回复控制在 600 字以内
+- 用中文回答，直接给结论"""
 
 
 def create_supervisor_agent() -> Agent:
@@ -140,6 +202,7 @@ def create_supervisor_agent() -> Agent:
     return Agent(
         model=model,
         tools=[
+            get_cached_diagnosis,
             query_score,
             analyze_root_cause,
             suggest_actions,

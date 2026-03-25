@@ -593,6 +593,10 @@ def run_diagnosis(asin_id: str) -> DiagnosisResponse:
     logger.info(f"Diagnosis {asin_id} completed in {diag_duration:.1f}s: "
                 f"{len(root_causes)} causes, {len(action_plan)} actions")
 
+    # 缓存诊断结果到 DynamoDB
+    from src.api.diagnosis_cache import save_diagnosis
+    save_diagnosis(asin_id, result.model_dump())
+
     return result
 
 

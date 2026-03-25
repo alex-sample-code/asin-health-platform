@@ -133,10 +133,11 @@ export default function DiagnosisPanel({ asinId }: { asinId: string }) {
 
   const [errors, setErrors] = useState<ModuleError[]>([]);
   const [streamError, setStreamError] = useState('');
+  const [fromCache, setFromCache] = useState(false);
 
   const errorsRef = useRef<ModuleError[]>([]);
 
-  const handleRun = useCallback(() => {
+  const handleRun = useCallback((force: boolean = false) => {
     setRunning(true);
     setHasStarted(true);
     setProblemOverview(null);
@@ -149,16 +150,36 @@ export default function DiagnosisPanel({ asinId }: { asinId: string }) {
 
     const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
-    // Step 1: 立即获取问题概览
-    startDiagnosis(asinId)
+    // Step 1: 立即获取问题概览（可能命中缓存）
+    startDiagnosis(asinId, force)
       .then(async (startData) => {
+        // 缓存命中：直接展示完整结果
+        if (startData.from_cache && startData.result) {
+          const result = startData.result as DiagnosisResponse;
+          setProblemOverview({
+            summary: result.summary,
+            health_label: result.health_label,
+            final_score: result.final_score,
+            problem_dimensions: result.problem_dimensions,
+          });
+          if (result.root_causes?.length) setRootCauses(result.root_causes);
+          if (result.benchmark) setBenchmark(result.benchmark);
+          if (result.action_plan?.length) setActionPlan(result.action_plan);
+          setRunning(false);
+          setFromCache(true);
+          return;
+        }
+
+        setFromCache(false);
         // 立即显示问题概览
-        setProblemOverview({
-          summary: startData.problem_overview.summary,
-          health_label: startData.problem_overview.health_label,
-          final_score: startData.problem_overview.final_score,
-          problem_dimensions: startData.problem_overview.problem_dimensions,
-        });
+        if (startData.problem_overview) {
+          setProblemOverview({
+            summary: startData.problem_overview.summary,
+            health_label: startData.problem_overview.health_label,
+            final_score: startData.problem_overview.final_score,
+            problem_dimensions: startData.problem_overview.problem_dimensions,
+          });
+        }
 
         // Step 2: 轮询完整结果
         const taskId = startData.task_id;
@@ -208,13 +229,29 @@ export default function DiagnosisPanel({ asinId }: { asinId: string }) {
           {'\uD83D\uDD0D'} 智能诊断
         </h3>
         <button
-          onClick={handleRun}
+          onClick={() => handleRun(false)}
           disabled={running}
           className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
         >
-          {running ? 'AI 正在分析中...' : hasStarted ? '重新诊断' : '开始诊断'}
+          {running ? 'AI 正在分析中...' : hasStarted ? '查看诊断' : '开始诊断'}
         </button>
+        {hasStarted && !running && (
+          <button
+            onClick={() => handleRun(true)}
+            className="ml-2 px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm font-medium transition-colors"
+            title="忽略缓存，重新运行 AI 诊断"
+          >
+            🔄 重新诊断
+          </button>
+        )}
       </div>
+
+      {/* Cache indicator */}
+      {fromCache && hasStarted && !running && (
+        <div className="bg-emerald-900/20 border border-emerald-800/50 rounded-lg px-3 py-2 text-emerald-400 text-xs">
+          ⚡ 来自缓存（24h 内诊断结果），点击「重新诊断」可刷新
+        </div>
+      )}
 
       {/* Stream-level error */}
       {streamError && (
