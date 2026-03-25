@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: asin-health-platform
+  namespace: asin-health
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:959545103699:certificate/5c7aac20-0faa-40ce-959f-4e8ae3474f6e
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-port: "8000"
+    alb.ingress.kubernetes.io/subnets: subnet-097171e1328af8777,subnet-0e9822121d53f1f9d,subnet-01b43b037b4ba70f5
+    # Security group will be updated after creation to restrict to CloudFront only
+    alb.ingress.kubernetes.io/group.name: asin-health
+spec:
+  ingressClassName: alb
+  rules:
+    - host: asin.chinabjalex.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: asin-health-platform
+                port:
+                  number: 8000

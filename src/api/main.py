@@ -7,11 +7,13 @@ from __future__ import annotations
 
 import json
 import logging
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from src.api.diagnosis import DiagnosisResponse, run_diagnosis, run_diagnosis_stream
@@ -198,3 +200,19 @@ def list_scores(
     filtered = filtered[:limit]
 
     return ScoreListResponse(total=len(filtered), scores=filtered)
+
+
+# ── 静态文件服务（前端 SPA）───────────────────────────────────────────────
+# Docker 构建时前端 build 产物放在 /app/static/
+# 本地开发时 frontend/dist/ 可能不存在，跳过即可
+_static_dir = Path(__file__).resolve().parents[2] / "static"
+if _static_dir.is_dir():
+    from fastapi.responses import FileResponse
+
+    # SPA fallback: 非 API 路径都返回 index.html
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def serve_spa(full_path: str):
+        file_path = _static_dir / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(_static_dir / "index.html")

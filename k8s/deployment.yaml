@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asin-health-platform
+  namespace: asin-health
+  labels:
+    app: asin-health-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: asin-health-platform
+  template:
+    metadata:
+      labels:
+        app: asin-health-platform
+    spec:
+      containers:
+        - name: app
+          image: 959545103699.dkr.ecr.us-east-1.amazonaws.com/asin-health-platform:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: AWS_DEFAULT_REGION
+              value: "us-east-1"
+          resources:
+            requests:
+              cpu: "256m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
