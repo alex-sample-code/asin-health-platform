@@ -1,44 +1,58 @@
-"""原始指标查询工具 — 从 data/raw/ 读取每日指标，供 Agent 调用。"""
+"""原始指标查询工具 — 从 S3 读取每日指标，供 Agent 调用。"""
 
 from __future__ import annotations
 
 import json
-from pathlib import Path
+import os
 from typing import Any
 
+import boto3
 from strands import tool
 
-DATA_DIR = Path(__file__).resolve().parents[2] / "data"
-RAW_DIR = DATA_DIR / "raw"
-PROFILES_PATH = RAW_DIR / "asin_profiles.json"
+S3_BUCKET = os.environ.get("S3_BUCKET", "asin-health-platform-data-959545103699")
+REGION = os.environ.get("AWS_REGION", "us-east-1")
+
+# S3 客户端（延迟初始化）
+_s3 = None
 
 # 缓存
 _profiles_cache: dict[str, dict[str, Any]] | None = None
 _metrics_cache: dict[str, list[dict[str, Any]]] = {}
 
 
+def _get_s3():
+    global _s3
+    if _s3 is None:
+        _s3 = boto3.client("s3", region_name=REGION)
+    return _s3
+
+
+def _load_s3_json(key: str) -> Any:
+    """从 S3 加载 JSON 文件。"""
+    resp = _get_s3().get_object(Bucket=S3_BUCKET, Key=key)
+    return json.loads(resp["Body"].read())
+
+
 def _load_profiles() -> dict[str, dict[str, Any]]:
-    """加载 ASIN 资料映射。"""
+    """从 S3 加载 ASIN 资料映射。"""
     global _profiles_cache
     if _profiles_cache is not None:
         return _profiles_cache
-    with open(PROFILES_PATH, "r", encoding="utf-8") as f:
-        profiles = json.load(f)
+    profiles = _load_s3_json("raw/asin_profiles.json")
     _profiles_cache = {p["asin"]: p for p in profiles}
     return _profiles_cache
 
 
 def _load_daily(asin: str) -> list[dict[str, Any]] | None:
-    """加载单个 ASIN 的每日指标。"""
+    """从 S3 加载单个 ASIN 的每日指标。"""
     if asin in _metrics_cache:
         return _metrics_cache[asin]
-    path = RAW_DIR / f"{asin}_daily.json"
-    if not path.exists():
+    try:
+        data = _load_s3_json(f"raw/{asin}_daily.json")
+        _metrics_cache[asin] = data
+        return data
+    except Exception:
         return None
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    _metrics_cache[asin] = data
-    return data
 
 
 @tool

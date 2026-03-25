@@ -1,31 +1,70 @@
-"""评分查询工具 — 从本地 JSON 读取评分数据，供 Agent 调用。"""
+"""评分查询工具 — 从 DynamoDB 读取评分数据，供 Agent 调用。"""
 
 from __future__ import annotations
 
 import json
-from pathlib import Path
+import os
+from decimal import Decimal
 from typing import Any
 
+import boto3
 from strands import tool
 
-DATA_DIR = Path(__file__).resolve().parents[2] / "data"
-SCORES_PATH = DATA_DIR / "scores" / "all_scores.json"
-PROFILES_PATH = DATA_DIR / "raw" / "asin_profiles.json"
+TABLE_NAME = os.environ.get("DYNAMODB_TABLE", "asin-health-scores")
+REGION = os.environ.get("AWS_REGION", "us-east-1")
 
-# 缓存：首次加载后复用
+# DynamoDB 客户端（延迟初始化）
+_table = None
+
+# 缓存
 _scores_cache: list[dict[str, Any]] | None = None
 _scores_by_asin: dict[str, dict[str, Any]] | None = None
 
 
+def _get_table():
+    """获取 DynamoDB Table resource。"""
+    global _table
+    if _table is None:
+        dynamodb = boto3.resource("dynamodb", region_name=REGION)
+        _table = dynamodb.Table(TABLE_NAME)
+    return _table
+
+
+def _decimal_to_float(obj: Any) -> Any:
+    """递归将 Decimal 转为 float。"""
+    if isinstance(obj, Decimal):
+        return float(obj)
+    if isinstance(obj, dict):
+        return {k: _decimal_to_float(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_decimal_to_float(i) for i in obj]
+    return obj
+
+
 def _load_scores() -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
-    """加载并缓存评分数据。"""
+    """从 DynamoDB 加载并缓存全部评分数据。"""
     global _scores_cache, _scores_by_asin
     if _scores_cache is not None and _scores_by_asin is not None:
         return _scores_cache, _scores_by_asin
 
-    with open(SCORES_PATH, "r", encoding="utf-8") as f:
-        _scores_cache = json.load(f)
-    _scores_by_asin = {s["asin"]: s for s in _scores_cache}
+    table = _get_table()
+    items = []
+    response = table.scan()
+    items.extend(response.get("Items", []))
+    while "LastEvaluatedKey" in response:
+        response = table.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
+        items.extend(response.get("Items", []))
+
+    # Decimal → float，去掉 DynamoDB key 字段
+    cleaned = []
+    for item in items:
+        item = _decimal_to_float(item)
+        item.pop("pk", None)
+        item.pop("sk", None)
+        cleaned.append(item)
+
+    _scores_cache = cleaned
+    _scores_by_asin = {s["asin"]: s for s in cleaned}
     return _scores_cache, _scores_by_asin
 
 
@@ -108,7 +147,6 @@ def list_asins_by_health(health_label: str, limit: int = 10) -> str:
         for s in all_scores
         if s["health_label"] == health_label
     ]
-    # 按分数排序
     filtered.sort(key=lambda x: x["final_score"])
     result = {
         "health_label": health_label,

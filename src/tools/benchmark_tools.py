@@ -1,16 +1,18 @@
-"""类目基准和竞品对比工具 — 从 data/benchmarks/ 读取，供 Agent 调用。"""
+"""类目基准和竞品对比工具 — 从 S3 读取，供 Agent 调用。"""
 
 from __future__ import annotations
 
 import json
-from pathlib import Path
+import os
 from typing import Any
 
+import boto3
 from strands import tool
 
-DATA_DIR = Path(__file__).resolve().parents[2] / "data"
-BENCHMARK_DIR = DATA_DIR / "benchmarks"
-PROFILES_PATH = DATA_DIR / "raw" / "asin_profiles.json"
+S3_BUCKET = os.environ.get("S3_BUCKET", "asin-health-platform-data-959545103699")
+REGION = os.environ.get("AWS_REGION", "us-east-1")
+
+_s3 = None
 
 # 缓存
 _benchmarks_cache: dict[str, Any] | None = None
@@ -18,13 +20,23 @@ _competitors_cache: dict[str, list[dict[str, Any]]] | None = None
 _profiles_by_asin: dict[str, dict[str, Any]] | None = None
 
 
+def _get_s3():
+    global _s3
+    if _s3 is None:
+        _s3 = boto3.client("s3", region_name=REGION)
+    return _s3
+
+
+def _load_s3_json(key: str) -> Any:
+    resp = _get_s3().get_object(Bucket=S3_BUCKET, Key=key)
+    return json.loads(resp["Body"].read())
+
+
 def _load_benchmarks() -> dict[str, Any]:
     global _benchmarks_cache
     if _benchmarks_cache is not None:
         return _benchmarks_cache
-    path = BENCHMARK_DIR / "category_benchmarks.json"
-    with open(path, "r", encoding="utf-8") as f:
-        _benchmarks_cache = json.load(f)
+    _benchmarks_cache = _load_s3_json("benchmarks/category_benchmarks.json")
     return _benchmarks_cache
 
 
@@ -32,9 +44,7 @@ def _load_competitors() -> dict[str, list[dict[str, Any]]]:
     global _competitors_cache
     if _competitors_cache is not None:
         return _competitors_cache
-    path = BENCHMARK_DIR / "competitor_asins.json"
-    with open(path, "r", encoding="utf-8") as f:
-        _competitors_cache = json.load(f)
+    _competitors_cache = _load_s3_json("benchmarks/competitor_asins.json")
     return _competitors_cache
 
 
@@ -42,8 +52,7 @@ def _load_profiles() -> dict[str, dict[str, Any]]:
     global _profiles_by_asin
     if _profiles_by_asin is not None:
         return _profiles_by_asin
-    with open(PROFILES_PATH, "r", encoding="utf-8") as f:
-        profiles = json.load(f)
+    profiles = _load_s3_json("raw/asin_profiles.json")
     _profiles_by_asin = {p["asin"]: p for p in profiles}
     return _profiles_by_asin
 
@@ -51,8 +60,6 @@ def _load_profiles() -> dict[str, dict[str, Any]]:
 @tool
 def get_category_benchmark(asin: str) -> str:
     """获取 ASIN 所在类目的基准数据（P25/中位数/P75）。
-
-    返回该类目下各核心指标的分位数基准，便于判断 ASIN 在类目中的位置。
 
     Args:
         asin: ASIN 编码，用于确定所属类目
@@ -84,8 +91,6 @@ def get_category_benchmark(asin: str) -> str:
 def get_competitor_list(asin: str) -> str:
     """获取 ASIN 所在类目的竞品列表。
 
-    返回同类目下的竞品 ASIN 列表，包含价格、评分、销量排名等信息。
-
     Args:
         asin: ASIN 编码，用于确定所属类目
     """
@@ -98,7 +103,6 @@ def get_competitor_list(asin: str) -> str:
     competitors = _load_competitors()
     comp_list = competitors.get(category, [])
 
-    # 同类目自有 ASIN
     benchmarks = _load_benchmarks()
     bench = benchmarks.get(category)
     own_asins = bench["competitor_asins"] if bench else []

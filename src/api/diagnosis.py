@@ -197,14 +197,10 @@ def _parse_action_items(text: str) -> list[ActionItem]:
         if not section.strip():
             continue
 
-        # 跳过 Agent 过渡语（非行动建议内容）
+        # 跳过明显的 Agent 过渡语（非行动建议内容）
         first_line_raw = section.strip().split("\n")[0].strip()
-        skip_patterns = [
-            r"数据已.*获取", r"以下是.*分析", r"以下是.*计划",
-            r"综合.*分析", r"根据.*分析", r"基于.*数据",
-            r"^---$", r"^##\s", r"总结",
-        ]
-        if any(re.search(p, first_line_raw) for p in skip_patterns):
+        # 只过滤非常明确的非建议内容
+        if re.match(r"^(数据已|以下是|---$|^$)", first_line_raw):
             continue
 
         # 提取优先级
@@ -312,15 +308,29 @@ def _parse_benchmark(text: str) -> BenchmarkComparison:
     # 提取弱于基准的维度
     weak_dims = []
     for line in text.split("\n"):
-        if re.search(r"低于|弱于|不及|落后|below|under", line, re.IGNORECASE):
-            weak_dims.append(line.strip().lstrip("-•*· ")[:100])
+        line_clean = line.strip().lstrip("-•*· ")
+        # 清理 markdown
+        line_clean = re.sub(r"\*\*", "", line_clean)
+        line_clean = re.sub(r"^#{1,3}\s*", "", line_clean)
+        line_clean = re.sub(r"^\d+[\.\)]\s*", "", line_clean).strip()
+        if not line_clean or len(line_clean) < 5:
+            continue
+        if re.search(r"低于|弱于|不及|落后|below|under|vs\s|VS\s", line_clean, re.IGNORECASE):
+            # 只保留具体的指标对比，不要标题行
+            if not re.search(r"弱于基准的维度|竞争力定位|竞争策略", line_clean):
+                weak_dims.append(line_clean[:120])
     if not weak_dims:
         weak_dims = ["参考 AI 详细分析"]
+
+    # 提取竞争策略建议（清理 markdown）
+    insights = text.strip()[:500] if text.strip() else "暂无竞品洞察"
+    insights = re.sub(r"\*\*", "", insights)
+    insights = re.sub(r"#{1,3}\s*", "", insights)
 
     return BenchmarkComparison(
         category_position=position,
         weak_vs_benchmark=weak_dims[:5],
-        competitor_insights=text.strip()[:500] if text.strip() else "暂无竞品洞察",
+        competitor_insights=insights,
     )
 
 
