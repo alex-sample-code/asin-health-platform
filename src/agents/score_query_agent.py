@@ -35,7 +35,7 @@ def create_score_query_agent() -> Agent:
     """创建评分查询 Agent（Claude Sonnet 4.6）。"""
     model = BedrockModel(
         model_id="us.anthropic.claude-sonnet-4-6",
-        max_tokens=4096,
+        max_tokens=8192,
         region_name="us-east-1",
     )
     return Agent(

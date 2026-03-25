@@ -140,7 +140,7 @@ def create_supervisor_agent() -> Agent:
     """创建 Supervisor Agent（Claude Sonnet 4.6），5 个 sub-agent 注册为工具。"""
     model = BedrockModel(
         model_id="us.anthropic.claude-sonnet-4-6",
-        max_tokens=4096,
+        max_tokens=8192,
         region_name="us-east-1",
     )
     return Agent(
