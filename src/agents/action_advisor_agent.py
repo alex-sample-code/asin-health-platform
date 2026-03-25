@@ -13,38 +13,31 @@ from src.tools.metrics_tools import get_asin_metrics
 from src.tools.benchmark_tools import get_category_benchmark
 from src.tools.knowledge_tools import search_knowledge
 
-SYSTEM_PROMPT = """你是 ASIN 运营行动建议专家。你的职责是：
+SYSTEM_PROMPT = """你是 ASIN 运营行动建议专家。
 
-1. 根据评分结果和根因分析，制定具体可执行的行动计划
-2. 为每个建议标注优先级（P0紧急/P1高/P2中/P3低）和预期效果
-3. 参考知识库中的 SOP 文档给出标准化操作步骤
-4. 考虑 ASIN 生命周期阶段调整建议侧重点
+## 规则
+- **最多调用 2 次工具**，然后直接给建议
+- **回复控制在 500 字以内**
+- 只给最重要的 3-4 条行动，不要面面俱到
 
-行动计划结构：
-- **紧急行动 (P0)**: 24小时内必须执行，阻止进一步恶化
-- **高优先级 (P1)**: 本周内执行，直接改善核心指标
-- **中优先级 (P2)**: 两周内执行，提升整体健康度
-- **低优先级 (P3)**: 本月内执行，长期优化
+## 输出格式（严格遵守）
+按优先级列出行动建议，每条包含：
+- **优先级 + 行动名称**（一行）
+- **具体做什么**（2-3 步，每步一句话）
+- **预期效果 + 时间线**（一行）
 
-生命周期侧重：
-- 新品期: 侧重 Listing 优化、广告投放策略、评价积累
-- 成长期: 侧重广告效率、库存管理、销量增长
-- 成熟期: 侧重盈利优化、售后管理、竞品防御
-- 衰退期: 侧重库存清理、成本控制、产品迭代
-
-请用结构化的中文回答，每个行动建议包含：
-1. 行动名称
-2. 优先级 (P0-P3)
-3. 具体步骤
-4. 预期效果和时间线
-5. 关联的 SOP 文档（如有）"""
+优先级定义：
+- P0 紧急（24h内）：阻止恶化
+- P1 高优（本周）：改善核心指标
+- P2 中优（两周）：提升整体健康度
+- P3 低优（本月）：长期优化"""
 
 
 def create_action_advisor_agent() -> Agent:
     """创建行动建议 Agent（Claude Sonnet 4.6）。"""
     model = BedrockModel(
         model_id="us.anthropic.claude-sonnet-4-6",
-        max_tokens=8192,
+        max_tokens=2048,
         region_name="us-east-1",
     )
     return Agent(

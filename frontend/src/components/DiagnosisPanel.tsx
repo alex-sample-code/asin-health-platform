@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
-import { streamDiagnosis } from '../api';
-import type { ActionItem, BenchmarkComparison, ProblemDimension, RootCause } from '../types';
+import { startDiagnosis } from '../api';
+import type { ActionItem, BenchmarkComparison, DiagnosisResponse, ProblemDimension, RootCause } from '../types';
 
 const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   critical: { bg: 'bg-red-900/30', text: 'text-red-400', label: '严重' },
@@ -147,34 +147,54 @@ export default function DiagnosisPanel({ asinId }: { asinId: string }) {
     setStreamError('');
     errorsRef.current = [];
 
-    streamDiagnosis(asinId, (evt) => {
-      switch (evt.event) {
-        case 'problem_overview':
-          setProblemOverview(evt.data as unknown as ProblemOverview);
-          break;
-        case 'root_cause':
-          setRootCauses((evt.data as { root_causes: RootCause[] }).root_causes);
-          break;
-        case 'benchmark':
-          setBenchmark((evt.data as { benchmark: BenchmarkComparison }).benchmark);
-          break;
-        case 'action_plan':
-          setActionPlan((evt.data as { action_plan: ActionItem[] }).action_plan);
-          break;
-        case 'error': {
-          const err = evt.data as unknown as ModuleError;
-          errorsRef.current = [...errorsRef.current, err];
-          setErrors([...errorsRef.current]);
-          break;
+    const BASE_URL = import.meta.env.VITE_API_URL ?? '';
+
+    // Step 1: 立即获取问题概览
+    startDiagnosis(asinId)
+      .then(async (startData) => {
+        // 立即显示问题概览
+        setProblemOverview({
+          summary: startData.problem_overview.summary,
+          health_label: startData.problem_overview.health_label,
+          final_score: startData.problem_overview.final_score,
+          problem_dimensions: startData.problem_overview.problem_dimensions,
+        });
+
+        // Step 2: 轮询完整结果
+        const taskId = startData.task_id;
+        const maxAttempts = 40;
+        for (let i = 0; i < maxAttempts; i++) {
+          await new Promise(r => setTimeout(r, 3000));
+          const pollRes = await fetch(`${BASE_URL}/diagnosis/result/${taskId}`);
+          if (!pollRes.ok) {
+            setStreamError(`Poll error: ${pollRes.status}`);
+            setRunning(false);
+            return;
+          }
+          const pollData = await pollRes.json();
+
+          if (pollData.status === 'done') {
+            const result = pollData.result as DiagnosisResponse;
+            if (result.root_causes?.length) setRootCauses(result.root_causes);
+            if (result.benchmark) setBenchmark(result.benchmark);
+            if (result.action_plan?.length) setActionPlan(result.action_plan);
+            setRunning(false);
+            return;
+          }
+          if (pollData.status === 'error') {
+            setStreamError(pollData.result || 'Diagnosis failed');
+            setRunning(false);
+            return;
+          }
+          // status === 'running', continue
         }
-        case 'done':
-          setRunning(false);
-          break;
-      }
-    }).catch((e) => {
-      setStreamError(e.message);
-      setRunning(false);
-    });
+        setStreamError('诊断超时，请重试');
+        setRunning(false);
+      })
+      .catch((e) => {
+        setStreamError(e.message || 'network error');
+        setRunning(false);
+      });
   }, [asinId]);
 
   const hasError = (module: string) => errors.some((e) => e.module === module);

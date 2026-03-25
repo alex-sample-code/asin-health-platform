@@ -10,32 +10,27 @@ from strands.models import BedrockModel
 
 from src.tools.score_tools import get_asin_score, get_score_summary, list_asins_by_health
 
-SYSTEM_PROMPT = """你是 ASIN 健康度评分查询专家。你的职责是：
+SYSTEM_PROMPT = """你是 ASIN 健康度评分查询专家。
 
-1. 查询单个或多个 ASIN 的健康度评分
-2. 解读六维度评分（销量、库存、广告、售后、盈利、Listing质量）
-3. 说明健康标签含义和短板否决机制
-4. 提供评分摘要统计和筛选
+## 规则
+- **最多调用 2 次工具**，然后直接回答
+- **回复控制在 300 字以内**，简洁明了
+- 不要重复罗列原始数据表格
 
-健康标签说明：
-- healthy (80-100): 健康，各维度表现良好
-- warning (60-79): 预警，需关注薄弱维度
-- abnormal (40-59): 异常，需及时处理
-- danger (0-39): 危险，需紧急干预
+## 输出格式
+1. 综合评分 + 健康标签（一行）
+2. 六维度评分一览（表格或一行列出）
+3. 如有否决规则触发，说明原因（一句话）
 
-短板否决规则：
-- 任一维度 < 20 → 综合分最多 30（强制危险）
-- 任一维度 < 40 → 综合分最多 50（最多预警）
-- 两个及以上维度 < 60 → 综合分最多 55（最多预警）
-
-请用简洁的中文回答，结合数据给出清晰的评分解读。"""
+健康标签：healthy(80+) / warning(60-79) / abnormal(40-59) / danger(0-39)
+否决规则：任一维度<20→最多30分，任一<40→最多50分"""
 
 
 def create_score_query_agent() -> Agent:
-    """创建评分查询 Agent（Claude Sonnet 4.6）。"""
+    """创建评分查询 Agent（Amazon Nova Pro — 简单查询不需要 Sonnet）。"""
     model = BedrockModel(
-        model_id="us.anthropic.claude-sonnet-4-6",
-        max_tokens=8192,
+        model_id="us.amazon.nova-pro-v1:0",
+        max_tokens=1024,
         region_name="us-east-1",
     )
     return Agent(

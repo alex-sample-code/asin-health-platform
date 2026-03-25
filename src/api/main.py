@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +18,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from src.api.diagnosis import DiagnosisResponse, run_diagnosis, run_diagnosis_stream
+from src.api.diagnosis import DiagnosisResponse, run_diagnosis, run_diagnosis_stream, _identify_problems, DIMENSION_CN, ProblemDimension
 from src.tools.score_tools import _load_scores
 
 logger = logging.getLogger(__name__)
@@ -91,6 +93,9 @@ class HealthCheckResponse(BaseModel):
 
 _supervisor = None
 
+# ── 异步诊断任务存储 ───────────────────────────────────────────────────────
+_diagnosis_tasks: dict[str, dict] = {}
+
 
 def _get_supervisor():
     """延迟初始化 Supervisor Agent（首次调用时创建）。"""
@@ -142,26 +147,72 @@ def get_score(asin_id: str) -> ScoreResponse:
 
 
 @app.post("/diagnosis/{asin_id}", tags=["智能诊断"])
-def diagnose_asin(asin_id: str) -> StreamingResponse:
-    """对指定 ASIN 执行 SSE 流式智能诊断，并行调用 Agent 逐步推送结果。
+def diagnose_asin(asin_id: str):
+    """异步启动 ASIN 智能诊断，返回 task_id 用于轮询结果。
 
-    SSE 事件顺序：problem_overview → root_cause / benchmark (并行) → action_plan → done
-    失败的模块会推送 error 事件，其他模块正常展示。
+    流程：立即返回问题概览 + task_id → 前端轮询 GET /diagnosis/result/{task_id}
     """
-    # 预检 ASIN 是否存在
     from src.tools.score_tools import _load_scores as _check_scores
     _, by_asin = _check_scores()
     if asin_id not in by_asin:
         raise HTTPException(status_code=404, detail=f"未找到 ASIN {asin_id} 的评分数据")
 
-    return StreamingResponse(
-        run_diagnosis_stream(asin_id),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-        },
+    score_data = by_asin[asin_id]
+
+    # 立即计算问题概览（无 LLM 调用，瞬间完成）
+    problems = _identify_problems(score_data)
+    if not problems:
+        dims = score_data.get("dimension_scores", {})
+        sorted_dims = sorted(dims.items(), key=lambda x: x[1])
+        for dim_key, val in sorted_dims[:2]:
+            problems.append(ProblemDimension(
+                dimension=dim_key,
+                dimension_cn=DIMENSION_CN.get(dim_key, dim_key),
+                score=round(val, 1),
+                severity="attention",
+                description=f"{DIMENSION_CN.get(dim_key, dim_key)}评分 {val:.1f}，相对最弱",
+            ))
+
+    problem_summary = "、".join(f"{p.dimension_cn}({p.score}分)" for p in problems)
+    summary = (
+        f"ASIN {asin_id} 综合健康度 {score_data['final_score']:.1f} 分（{score_data['health_label']}），"
+        f"主要问题维度：{problem_summary}。"
     )
+
+    # 启动后台线程跑 Agent 分析
+    task_id = str(uuid.uuid4())[:8]
+    _diagnosis_tasks[task_id] = {"status": "running", "result": None}
+
+    def _run():
+        try:
+            result = run_diagnosis(asin_id)
+            _diagnosis_tasks[task_id] = {"status": "done", "result": result.model_dump()}
+        except Exception as e:
+            logger.exception("Diagnosis failed")
+            _diagnosis_tasks[task_id] = {"status": "error", "result": str(e)}
+
+    threading.Thread(target=_run, daemon=True).start()
+
+    return {
+        "task_id": task_id,
+        "status": "running",
+        "problem_overview": {
+            "asin": asin_id,
+            "health_label": score_data["health_label"],
+            "final_score": round(score_data["final_score"], 1),
+            "summary": summary,
+            "problem_dimensions": [p.model_dump() for p in problems],
+        },
+    }
+
+
+@app.get("/diagnosis/result/{task_id}", tags=["智能诊断"])
+def get_diagnosis_result(task_id: str):
+    """轮询诊断结果。status: running / done / error"""
+    task = _diagnosis_tasks.get(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return task
 
 
 VALID_LABELS = {"healthy", "warning", "abnormal", "danger"}

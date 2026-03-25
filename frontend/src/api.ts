@@ -1,4 +1,4 @@
-import type { AsinScore, DiagnosisResponse, ScoreListResponse } from './types';
+import type { AsinScore, DiagnosisResponse, ProblemDimension, ScoreListResponse } from './types';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
@@ -24,6 +24,33 @@ export async function fetchScore(asinId: string): Promise<AsinScore> {
 }
 
 export async function fetchDiagnosis(asinId: string): Promise<DiagnosisResponse> {
+  // Step 1: Start diagnosis (returns immediately with problem_overview + task_id)
+  const startRes = await fetch(`${BASE_URL}/diagnosis/${asinId}`, { method: 'POST' });
+  if (!startRes.ok) throw new Error(`API error: ${startRes.status}`);
+  const startData = await startRes.json();
+  const taskId = startData.task_id;
+
+  // Step 2: Poll for result every 3 seconds (max 120s)
+  const maxAttempts = 40;
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise(r => setTimeout(r, 3000));
+    const pollRes = await fetch(`${BASE_URL}/diagnosis/result/${taskId}`);
+    if (!pollRes.ok) throw new Error(`Poll error: ${pollRes.status}`);
+    const pollData = await pollRes.json();
+
+    if (pollData.status === 'done') {
+      return pollData.result as DiagnosisResponse;
+    }
+    if (pollData.status === 'error') {
+      throw new Error(pollData.result || 'Diagnosis failed');
+    }
+    // status === 'running', continue polling
+  }
+  throw new Error('Diagnosis timeout');
+}
+
+// Start diagnosis and get immediate problem overview
+export async function startDiagnosis(asinId: string): Promise<{ task_id: string; problem_overview: { asin: string; health_label: string; final_score: number; summary: string; problem_dimensions: ProblemDimension[] } }> {
   const res = await fetch(`${BASE_URL}/diagnosis/${asinId}`, { method: 'POST' });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();

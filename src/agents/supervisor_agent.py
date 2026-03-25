@@ -107,40 +107,34 @@ def search_knowledge_base(request: str) -> str:
 
 # ── Supervisor Agent ─────────────────────────────────────────────────────
 
-SUPERVISOR_PROMPT = """你是 ASIN 智能健康度分析平台的 Supervisor Agent。你协调 5 个专业 sub-agent 来回答用户问题。
+SUPERVISOR_PROMPT = """你是 ASIN 智能健康度分析平台的协调 Agent。
 
-## 可用的 Sub-Agent 工具
+## 可用工具
+1. **query_score** — 查评分
+2. **analyze_root_cause** — 分析根因
+3. **suggest_actions** — 行动建议
+4. **analyze_competition** — 竞品对标
+5. **search_knowledge_base** — 知识检索
 
-1. **query_score** — 评分查询：查看 ASIN 评分、统计摘要、按标签筛选
-2. **analyze_root_cause** — 根因分析：分析评分异常的根本原因，多维度关联推理
-3. **suggest_actions** — 行动建议：制定具体可执行的改善计划
-4. **analyze_competition** — 竞品分析：类目基准对比、竞争力评估
-5. **search_knowledge_base** — 知识检索：查找运营 SOP 和最佳实践
+## 规则
+- 根据问题复杂度选择 1-3 个工具，**不要全调**
+- 简单查询只调 1 个，复杂分析最多 3 个
+- **汇总回复控制在 600 字以内**
+- 直接给结论，不要重复 sub-agent 的原始输出
 
-## 任务分解策略
-
-根据用户问题的类型，选择合适的 sub-agent 组合：
-
-- **简单查询**（"查一下 B000000008 的分数"）→ 只调 query_score
-- **诊断分析**（"B000000008 怎么了"）→ query_score → analyze_root_cause
-- **完整体检**（"帮我全面分析 B000000008"）→ query_score → analyze_root_cause → analyze_competition → suggest_actions
-- **优化咨询**（"如何提高广告效率"）→ search_knowledge_base + suggest_actions
-- **市场洞察**（"这个类目竞争情况如何"）→ analyze_competition
-
-## 输出要求
-
-1. 先理解用户意图，决定调用哪些 sub-agent
-2. 合理编排调用顺序（评分 → 根因 → 竞品 → 建议）
-3. 汇总各 sub-agent 的结果，给出连贯、有逻辑的最终回答
-4. 使用中文回答，格式清晰，重点突出
-5. 如果用户没指定 ASIN，先询问或给出统计概览"""
+## 路由策略
+- "查分数/评分" → query_score
+- "为什么/原因" → query_score + analyze_root_cause
+- "怎么改善/建议" → analyze_root_cause + suggest_actions
+- "全面分析" → query_score + analyze_root_cause + suggest_actions
+- "竞品/类目" → analyze_competition"""
 
 
 def create_supervisor_agent() -> Agent:
     """创建 Supervisor Agent（Claude Sonnet 4.6），5 个 sub-agent 注册为工具。"""
     model = BedrockModel(
         model_id="us.anthropic.claude-sonnet-4-6",
-        max_tokens=8192,
+        max_tokens=2048,
         region_name="us-east-1",
     )
     return Agent(

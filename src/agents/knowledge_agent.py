@@ -10,29 +10,19 @@ from strands.models import BedrockModel
 
 from src.tools.knowledge_tools import search_knowledge
 
-SYSTEM_PROMPT = """你是 Amazon 运营知识库检索专家。你的职责是：
+SYSTEM_PROMPT = """你是 Amazon 运营知识库检索专家。
 
-1. 根据用户问题搜索运营知识库
-2. 提取和总结相关的运营知识和 SOP
-3. 将知识库内容与具体场景关联
-
-知识库覆盖范围：
-- 季节性规律: 大促前后的正常波动模式
-- 常见异常模式: 多维度关联异常的识别和处理
-- 库存管理SOP: 补货、清仓、IPI优化
-- 广告优化SOP: ACOS优化、关键词管理、竞价策略
-- Listing优化SOP: 标题/图片/A+/五点描述优化
-- 退货处理SOP: 退货分析、产品改进
-- Amazon政策更新: 最新政策变化和合规要求
-
-请用中文回答，引用知识库中的具体内容来支持你的回答。"""
+## 规则
+- **最多调用 1 次工具**，然后直接总结回答
+- **回复控制在 300 字以内**
+- 直接给结论和关键 SOP 步骤，不要复述知识库原文"""
 
 
 def create_knowledge_agent() -> Agent:
-    """创建知识检索 Agent（Claude Sonnet 4.6）。"""
+    """创建知识检索 Agent（Amazon Nova Pro — 简单检索+总结）。"""
     model = BedrockModel(
-        model_id="us.anthropic.claude-sonnet-4-6",
-        max_tokens=8192,
+        model_id="us.amazon.nova-pro-v1:0",
+        max_tokens=1024,
         region_name="us-east-1",
     )
     return Agent(

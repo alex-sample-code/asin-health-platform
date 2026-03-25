@@ -298,7 +298,7 @@ def _parse_benchmark(text: str) -> BenchmarkComparison:
 
 
 def run_diagnosis(asin_id: str) -> DiagnosisResponse:
-    """执行完整诊断流程，串行调用 3 个 Agent。"""
+    """执行完整诊断流程，root_cause 和 competitor 并行调用。"""
 
     # 1. 加载评分数据
     _, by_asin = _load_scores()
@@ -312,7 +312,6 @@ def run_diagnosis(asin_id: str) -> DiagnosisResponse:
     # 2. 识别异常维度
     problems = _identify_problems(score_data)
     if not problems:
-        # 没有低于 60 的维度，找最低的两个作为关注点
         dims = score_data.get("dimension_scores", {})
         sorted_dims = sorted(dims.items(), key=lambda x: x[1])
         for dim_key, val in sorted_dims[:2]:
@@ -326,60 +325,60 @@ def run_diagnosis(asin_id: str) -> DiagnosisResponse:
 
     problem_summary = "、".join(f"{p.dimension_cn}({p.score}分)" for p in problems)
 
-    # 3. 调 root_cause Agent
-    root_cause_text = ""
-    try:
-        agent = _get_root_cause_agent()
-        prompt = (
-            f"分析 ASIN {asin_id} 的健康度异常。"
-            f"综合评分 {final_score:.1f}（{health_label}），"
-            f"异常维度：{problem_summary}。"
-            f"请给出根因假设和置信度（高/中/低），每个假设附上支撑证据。"
-        )
-        result = agent(prompt)
-        root_cause_text = str(result)
-    except Exception as e:
-        logger.exception("Root cause agent 调用失败")
-        root_cause_text = f"根因分析调用失败: {e}"
+    # 3. 并行调 root_cause Agent 和 competitor Agent
+    def _call_root_cause() -> str:
+        try:
+            agent = _get_root_cause_agent()
+            prompt = (
+                f"分析 ASIN {asin_id} 的健康度异常。"
+                f"综合评分 {final_score:.1f}（{health_label}），"
+                f"异常维度：{problem_summary}。"
+                f"请给出根因假设和置信度（高/中/低），每个假设附上支撑证据。"
+            )
+            return str(agent(prompt))
+        except Exception as e:
+            logger.exception("Root cause agent 调用失败")
+            return f"根因分析调用失败: {e}"
+
+    def _call_competitor() -> str:
+        try:
+            agent = _get_competitor_agent()
+            prompt = (
+                f"分析 ASIN {asin_id} 在类目中的竞争力位置，对比行业基准。"
+                f"重点关注弱于基准的维度。"
+            )
+            return str(agent(prompt))
+        except Exception as e:
+            logger.exception("Competitor agent 调用失败")
+            return f"竞品分析调用失败: {e}"
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        root_future = executor.submit(_call_root_cause)
+        bench_future = executor.submit(_call_competitor)
+        root_cause_text = root_future.result()
+        benchmark_text = bench_future.result()
 
     root_causes = _parse_root_causes(root_cause_text)
+    benchmark = _parse_benchmark(benchmark_text)
 
-    # 4. 调 action_advisor Agent
-    action_text = ""
+    # 4. 串行调 action_advisor Agent（依赖根因结果）
     try:
-        agent = _get_action_advisor_agent()
         root_cause_summary = "; ".join(rc.hypothesis for rc in root_causes[:3])
+        agent = _get_action_advisor_agent()
         prompt = (
             f"为 ASIN {asin_id} 制定行动计划。"
             f"当前问题：综合评分 {final_score:.1f}，异常维度 {problem_summary}。"
             f"根因分析：{root_cause_summary}。"
             f"请按 P0-P3 优先级给出建议，每条包含具体步骤、预期效果和时间线。"
         )
-        result = agent(prompt)
-        action_text = str(result)
+        action_text = str(agent(prompt))
     except Exception as e:
         logger.exception("Action advisor agent 调用失败")
         action_text = f"行动建议调用失败: {e}"
 
     action_plan = _parse_action_items(action_text)
 
-    # 5. 调 competitor Agent
-    benchmark_text = ""
-    try:
-        agent = _get_competitor_agent()
-        prompt = (
-            f"分析 ASIN {asin_id} 在类目中的竞争力位置，对比行业基准。"
-            f"重点关注弱于基准的维度。"
-        )
-        result = agent(prompt)
-        benchmark_text = str(result)
-    except Exception as e:
-        logger.exception("Competitor agent 调用失败")
-        benchmark_text = f"竞品分析调用失败: {e}"
-
-    benchmark = _parse_benchmark(benchmark_text)
-
-    # 6. 汇总
+    # 5. 汇总
     summary = (
         f"ASIN {asin_id} 综合健康度 {final_score:.1f} 分（{health_label}），"
         f"主要问题维度：{problem_summary}。"

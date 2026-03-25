@@ -43,13 +43,13 @@ def _load_daily(asin: str) -> list[dict[str, Any]] | None:
 
 @tool
 def get_asin_metrics(asin: str, days: int = 7) -> str:
-    """查询 ASIN 最近 N 天的原始指标数据。
+    """查询 ASIN 最近 N 天指标的聚合摘要（均值/最新值/趋势）。
 
-    返回每日的销量、库存、广告、售后、盈利、Listing 全部指标，以及 ASIN 基础资料。
+    返回 ASIN 基础资料和关键指标的汇总统计，不返回每日明细。
 
     Args:
         asin: ASIN 编码，例如 "B000000001"
-        days: 查询天数，默认 7（最大 30）
+        days: 统计天数，默认 7（最大 30）
     """
     profiles = _load_profiles()
     profile = profiles.get(asin)
@@ -63,11 +63,28 @@ def get_asin_metrics(asin: str, days: int = 7) -> str:
     days = min(days, len(daily))
     recent = daily[-days:]
 
+    # 聚合关键指标
+    key_metrics = [
+        "daily_orders", "daily_revenue", "cvr", "sessions",
+        "cpc", "acos", "ad_spend", "return_rate", "avg_rating",
+        "review_count", "gross_margin", "bsr", "fba_stock_days",
+    ]
+    summary = {}
+    for metric in key_metrics:
+        vals = [d.get(metric) for d in recent if d.get(metric) is not None]
+        if vals:
+            summary[metric] = {
+                "latest": round(vals[-1], 4),
+                "avg": round(sum(vals) / len(vals), 4),
+                "min": round(min(vals), 4),
+                "max": round(max(vals), 4),
+            }
+
     result = {
         "asin": asin,
-        "profile": profile,
-        "days_requested": days,
-        "metrics": recent,
+        "profile": {k: profile[k] for k in ["asin", "category", "sub_category", "price", "lifecycle"] if k in profile},
+        "days": days,
+        "metrics_summary": summary,
     }
     return json.dumps(result, ensure_ascii=False, indent=2)
 
@@ -125,11 +142,11 @@ def get_metrics_trend(asin: str, metric_name: str) -> str:
     result = {
         "asin": asin,
         "metric_name": metric_name,
-        "daily_values": [{"date": d, "value": v} for d, v in zip(dates, values)],
         "avg_7d": round(avg_7d, 4),
         "avg_30d": round(avg_30d, 4),
         "min": round(min(values), 4) if values else None,
         "max": round(max(values), 4) if values else None,
+        "latest": round(values[-1], 4) if values else None,
         "change_pct": round(change_pct, 4),
         "trend": trend,
     }
