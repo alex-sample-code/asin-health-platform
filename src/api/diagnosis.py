@@ -1,12 +1,11 @@
-"""ASIN 智能诊断模块 — 串行编排 3 个 Agent 生成结构化诊断报告。
+"""ASIN 智能诊断模块 — SSE 流式推送 + Agent 并行调用。
 
 流程：
-1. 从本地 JSON 取评分数据
-2. 识别异常维度 (score < 60)
-3. 调 root_cause Agent 分析根因
-4. 调 action_advisor Agent 给行动建议
-5. 调 competitor Agent 对标竞品
-6. 汇总成 DiagnosisResponse
+1. 从本地 JSON 计算问题概览 → 立即推送 problem_overview
+2. 并行启动 root_cause Agent 和 competitor Agent
+   - 各自完成后推送 root_cause / benchmark
+3. 等根因结果出来后，调 action_advisor Agent → 推送 action_plan
+4. 推送 done 事件
 """
 
 from __future__ import annotations
@@ -14,7 +13,8 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any
+from concurrent.futures import ThreadPoolExecutor, Future
+from typing import Any, Generator
 
 from pydantic import BaseModel
 
@@ -395,3 +395,145 @@ def run_diagnosis(asin_id: str) -> DiagnosisResponse:
         action_plan=action_plan,
         benchmark=benchmark,
     )
+
+
+# ── SSE 流式诊断 ─────────────────────────────────────────────────────────
+
+
+def _sse_event(event: str, data: dict[str, Any]) -> str:
+    """格式化一个 SSE 事件。"""
+    payload = json.dumps(data, ensure_ascii=False)
+    return f"event: {event}\ndata: {payload}\n\n"
+
+
+def run_diagnosis_stream(asin_id: str) -> Generator[str, None, None]:
+    """流式诊断生成器，yield SSE 事件字符串。"""
+
+    # 1. 加载评分数据
+    _, by_asin = _load_scores()
+    score_data = by_asin.get(asin_id)
+    if score_data is None:
+        yield _sse_event("error", {"module": "score_data", "message": f"未找到 ASIN {asin_id} 的评分数据"})
+        return
+
+    health_label = score_data["health_label"]
+    final_score = score_data["final_score"]
+
+    # 2. 识别异常维度 → 立即推送 problem_overview
+    problems = _identify_problems(score_data)
+    if not problems:
+        dims = score_data.get("dimension_scores", {})
+        sorted_dims = sorted(dims.items(), key=lambda x: x[1])
+        for dim_key, val in sorted_dims[:2]:
+            problems.append(ProblemDimension(
+                dimension=dim_key,
+                dimension_cn=DIMENSION_CN.get(dim_key, dim_key),
+                score=round(val, 1),
+                severity="attention",
+                description=f"{DIMENSION_CN.get(dim_key, dim_key)}评分 {val:.1f}，相对最弱",
+            ))
+
+    problem_summary = "、".join(f"{p.dimension_cn}({p.score}分)" for p in problems)
+    summary = (
+        f"ASIN {asin_id} 综合健康度 {final_score:.1f} 分（{health_label}），"
+        f"主要问题维度：{problem_summary}。"
+    )
+
+    yield _sse_event("problem_overview", {
+        "asin": asin_id,
+        "health_label": health_label,
+        "final_score": round(final_score, 1),
+        "summary": summary,
+        "problem_dimensions": [p.model_dump() for p in problems],
+    })
+
+    # 3. 并行调 root_cause Agent 和 competitor Agent
+    root_cause_text = ""
+    benchmark_text = ""
+
+    def _call_root_cause() -> str:
+        try:
+            agent = _get_root_cause_agent()
+            prompt = (
+                f"分析 ASIN {asin_id} 的健康度异常。"
+                f"综合评分 {final_score:.1f}（{health_label}），"
+                f"异常维度：{problem_summary}。"
+                f"请给出根因假设和置信度（高/中/低），每个假设附上支撑证据。"
+            )
+            return str(agent(prompt))
+        except Exception as e:
+            logger.exception("Root cause agent 调用失败")
+            return ""
+
+    def _call_competitor() -> str:
+        try:
+            agent = _get_competitor_agent()
+            prompt = (
+                f"分析 ASIN {asin_id} 在类目中的竞争力位置，对比行业基准。"
+                f"重点关注弱于基准的维度。"
+            )
+            return str(agent(prompt))
+        except Exception as e:
+            logger.exception("Competitor agent 调用失败")
+            return ""
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        root_future: Future[str] = executor.submit(_call_root_cause)
+        bench_future: Future[str] = executor.submit(_call_competitor)
+
+        # 等两个都完成，谁先完成先推送谁
+        root_done = False
+        bench_done = False
+
+        while not (root_done and bench_done):
+            if not root_done and root_future.done():
+                root_cause_text = root_future.result()
+                root_done = True
+                if root_cause_text:
+                    root_causes = _parse_root_causes(root_cause_text)
+                    yield _sse_event("root_cause", {
+                        "root_causes": [rc.model_dump() for rc in root_causes],
+                    })
+                else:
+                    yield _sse_event("error", {"module": "root_cause", "message": "根因分析调用失败"})
+
+            if not bench_done and bench_future.done():
+                benchmark_text = bench_future.result()
+                bench_done = True
+                if benchmark_text:
+                    benchmark = _parse_benchmark(benchmark_text)
+                    yield _sse_event("benchmark", {"benchmark": benchmark.model_dump()})
+                else:
+                    yield _sse_event("error", {"module": "benchmark", "message": "竞品分析调用失败"})
+
+            if not (root_done and bench_done):
+                # 短暂等待避免忙循环
+                import time
+                time.sleep(0.1)
+
+    # 4. 串行调 action_advisor Agent（依赖根因结果）
+    try:
+        if root_cause_text:
+            root_causes_parsed = _parse_root_causes(root_cause_text)
+        else:
+            root_causes_parsed = []
+        root_cause_summary = "; ".join(rc.hypothesis for rc in root_causes_parsed[:3])
+
+        agent = _get_action_advisor_agent()
+        prompt = (
+            f"为 ASIN {asin_id} 制定行动计划。"
+            f"当前问题：综合评分 {final_score:.1f}，异常维度 {problem_summary}。"
+            f"根因分析：{root_cause_summary}。"
+            f"请按 P0-P3 优先级给出建议，每条包含具体步骤、预期效果和时间线。"
+        )
+        action_text = str(agent(prompt))
+        action_plan = _parse_action_items(action_text)
+        yield _sse_event("action_plan", {
+            "action_plan": [item.model_dump() for item in action_plan],
+        })
+    except Exception as e:
+        logger.exception("Action advisor agent 调用失败")
+        yield _sse_event("error", {"module": "action_plan", "message": "行动建议调用失败"})
+
+    # 5. 完成
+    yield _sse_event("done", {"status": "complete"})

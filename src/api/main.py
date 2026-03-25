@@ -11,9 +11,10 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from src.api.diagnosis import DiagnosisResponse, run_diagnosis
+from src.api.diagnosis import DiagnosisResponse, run_diagnosis, run_diagnosis_stream
 from src.tools.score_tools import _load_scores
 
 logger = logging.getLogger(__name__)
@@ -138,19 +139,27 @@ def get_score(asin_id: str) -> ScoreResponse:
     return ScoreResponse(**score)
 
 
-@app.post("/diagnosis/{asin_id}", response_model=DiagnosisResponse, tags=["智能诊断"])
-def diagnose_asin(asin_id: str) -> DiagnosisResponse:
-    """对指定 ASIN 执行智能诊断，串行调用 3 个 Agent 生成结构化报告。
+@app.post("/diagnosis/{asin_id}", tags=["智能诊断"])
+def diagnose_asin(asin_id: str) -> StreamingResponse:
+    """对指定 ASIN 执行 SSE 流式智能诊断，并行调用 Agent 逐步推送结果。
 
-    流程：评分数据 → 异常识别 → 根因分析 → 行动建议 → 竞品对标
+    SSE 事件顺序：problem_overview → root_cause / benchmark (并行) → action_plan → done
+    失败的模块会推送 error 事件，其他模块正常展示。
     """
-    try:
-        return run_diagnosis(asin_id)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        logger.exception("诊断失败")
-        raise HTTPException(status_code=500, detail=f"诊断失败: {e}")
+    # 预检 ASIN 是否存在
+    from src.tools.score_tools import _load_scores as _check_scores
+    _, by_asin = _check_scores()
+    if asin_id not in by_asin:
+        raise HTTPException(status_code=404, detail=f"未找到 ASIN {asin_id} 的评分数据")
+
+    return StreamingResponse(
+        run_diagnosis_stream(asin_id),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 VALID_LABELS = {"healthy", "warning", "abnormal", "danger"}

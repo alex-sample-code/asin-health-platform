@@ -28,6 +28,55 @@ export async function fetchDiagnosis(asinId: string): Promise<DiagnosisResponse>
   return res.json();
 }
 
+export interface SSEEvent {
+  event: string;
+  data: Record<string, unknown>;
+}
+
+export async function streamDiagnosis(
+  asinId: string,
+  onEvent: (evt: SSEEvent) => void,
+): Promise<void> {
+  const res = await fetch(`${BASE_URL}/diagnosis/${asinId}`, { method: 'POST' });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+
+  const reader = res.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+
+    // 解析 SSE：每个事件以 \n\n 分隔
+    const parts = buffer.split('\n\n');
+    // 最后一个可能不完整，留在 buffer
+    buffer = parts.pop() ?? '';
+
+    for (const part of parts) {
+      if (!part.trim()) continue;
+      let eventName = 'message';
+      let dataStr = '';
+      for (const line of part.split('\n')) {
+        if (line.startsWith('event: ')) {
+          eventName = line.slice(7).trim();
+        } else if (line.startsWith('data: ')) {
+          dataStr = line.slice(6);
+        }
+      }
+      if (dataStr) {
+        try {
+          onEvent({ event: eventName, data: JSON.parse(dataStr) });
+        } catch {
+          // JSON 解析失败，跳过
+        }
+      }
+    }
+  }
+}
+
 export async function sendChat(message: string): Promise<string> {
   const res = await fetch(`${BASE_URL}/chat`, {
     method: 'POST',

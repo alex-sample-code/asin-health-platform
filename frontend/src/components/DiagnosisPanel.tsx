@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { fetchDiagnosis } from '../api';
-import type { DiagnosisResponse, ActionItem } from '../types';
+import { useCallback, useRef, useState } from 'react';
+import { streamDiagnosis } from '../api';
+import type { ActionItem, BenchmarkComparison, ProblemDimension, RootCause } from '../types';
 
 const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   critical: { bg: 'bg-red-900/30', text: 'text-red-400', label: '严重' },
@@ -27,6 +27,42 @@ const PRIORITY_BADGE: Record<string, { bg: string; text: string }> = {
   P2: { bg: 'bg-yellow-900/30', text: 'text-yellow-400' },
   P3: { bg: 'bg-blue-900/30', text: 'text-blue-400' },
 };
+
+// ── 子组件 ────────────────────────────────────────────────────────────────
+
+function Spinner() {
+  return (
+    <svg className="animate-spin h-4 w-4 text-indigo-400" viewBox="0 0 24 24" fill="none">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  );
+}
+
+function SkeletonCard({ title }: { title: string }) {
+  return (
+    <div className="bg-[#1a1b23] rounded-lg p-6 border border-gray-800 animate-pulse">
+      <div className="flex items-center gap-2 mb-4">
+        <Spinner />
+        <span className="text-gray-500 text-xs font-medium uppercase tracking-wider">{title}</span>
+      </div>
+      <div className="space-y-3">
+        <div className="h-3 bg-gray-700/60 rounded w-full" />
+        <div className="h-3 bg-gray-700/60 rounded w-5/6" />
+        <div className="h-3 bg-gray-700/60 rounded w-2/3" />
+      </div>
+    </div>
+  );
+}
+
+function ErrorCard({ title, message }: { title: string; message: string }) {
+  return (
+    <div className="bg-[#1a1b23] rounded-lg p-6 border border-red-800/50">
+      <h4 className="text-red-400 text-xs font-medium uppercase tracking-wider mb-3">{title}</h4>
+      <p className="text-red-400/80 text-sm">{message}</p>
+    </div>
+  );
+}
 
 function ActionCard({ item }: { item: ActionItem }) {
   const [expanded, setExpanded] = useState(false);
@@ -70,33 +106,79 @@ function ActionCard({ item }: { item: ActionItem }) {
   );
 }
 
-function SkeletonCard() {
-  return (
-    <div className="bg-[#1a1b23] rounded-lg p-6 border border-gray-800 animate-pulse">
-      <div className="h-4 bg-gray-700 rounded w-1/3 mb-4" />
-      <div className="space-y-3">
-        <div className="h-3 bg-gray-700/60 rounded w-full" />
-        <div className="h-3 bg-gray-700/60 rounded w-5/6" />
-        <div className="h-3 bg-gray-700/60 rounded w-2/3" />
-      </div>
-    </div>
-  );
+// ── 各阶段状态类型 ────────────────────────────────────────────────────────
+
+interface ProblemOverview {
+  summary: string;
+  problem_dimensions: ProblemDimension[];
+  health_label: string;
+  final_score: number;
 }
 
-export default function DiagnosisPanel({ asinId }: { asinId: string }) {
-  const [data, setData] = useState<DiagnosisResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+interface ModuleError {
+  module: string;
+  message: string;
+}
 
-  const handleRun = () => {
-    setLoading(true);
-    setError('');
-    setData(null);
-    fetchDiagnosis(asinId)
-      .then(setData)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
-  };
+// ── 主组件 ────────────────────────────────────────────────────────────────
+
+export default function DiagnosisPanel({ asinId }: { asinId: string }) {
+  const [running, setRunning] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  const [problemOverview, setProblemOverview] = useState<ProblemOverview | null>(null);
+  const [rootCauses, setRootCauses] = useState<RootCause[] | null>(null);
+  const [benchmark, setBenchmark] = useState<BenchmarkComparison | null>(null);
+  const [actionPlan, setActionPlan] = useState<ActionItem[] | null>(null);
+
+  const [errors, setErrors] = useState<ModuleError[]>([]);
+  const [streamError, setStreamError] = useState('');
+
+  const errorsRef = useRef<ModuleError[]>([]);
+
+  const handleRun = useCallback(() => {
+    setRunning(true);
+    setHasStarted(true);
+    setProblemOverview(null);
+    setRootCauses(null);
+    setBenchmark(null);
+    setActionPlan(null);
+    setErrors([]);
+    setStreamError('');
+    errorsRef.current = [];
+
+    streamDiagnosis(asinId, (evt) => {
+      switch (evt.event) {
+        case 'problem_overview':
+          setProblemOverview(evt.data as unknown as ProblemOverview);
+          break;
+        case 'root_cause':
+          setRootCauses((evt.data as { root_causes: RootCause[] }).root_causes);
+          break;
+        case 'benchmark':
+          setBenchmark((evt.data as { benchmark: BenchmarkComparison }).benchmark);
+          break;
+        case 'action_plan':
+          setActionPlan((evt.data as { action_plan: ActionItem[] }).action_plan);
+          break;
+        case 'error': {
+          const err = evt.data as unknown as ModuleError;
+          errorsRef.current = [...errorsRef.current, err];
+          setErrors([...errorsRef.current]);
+          break;
+        }
+        case 'done':
+          setRunning(false);
+          break;
+      }
+    }).catch((e) => {
+      setStreamError(e.message);
+      setRunning(false);
+    });
+  }, [asinId]);
+
+  const hasError = (module: string) => errors.some((e) => e.module === module);
+  const getError = (module: string) => errors.find((e) => e.module === module);
 
   return (
     <div className="space-y-4">
@@ -107,134 +189,141 @@ export default function DiagnosisPanel({ asinId }: { asinId: string }) {
         </h3>
         <button
           onClick={handleRun}
-          disabled={loading}
+          disabled={running}
           className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
         >
-          {loading ? 'AI 正在分析中...' : data ? '重新诊断' : '开始诊断'}
+          {running ? 'AI 正在分析中...' : hasStarted ? '重新诊断' : '开始诊断'}
         </button>
       </div>
 
-      {/* Loading */}
-      {loading && (
-        <div className="space-y-4">
-          <div className="text-center text-gray-400 text-sm py-2">
-            {'\u2728'} AI Agent 正在分析中，请稍候...
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-          </div>
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
+      {/* Stream-level error */}
+      {streamError && (
         <div className="bg-red-900/20 border border-red-800/50 rounded-lg p-4 text-red-400 text-sm">
-          诊断失败: {error}
+          诊断失败: {streamError}
         </div>
       )}
 
-      {/* Results */}
-      {data && !loading && (
+      {/* 阶段性渲染 */}
+      {hasStarted && !streamError && (
         <div className="space-y-4">
 
           {/* Card 1: 问题概览 */}
-          <div className="bg-[#1a1b23] rounded-lg p-6 border border-gray-800">
-            <h4 className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-3">
-              {'\u26A0\uFE0F'} 问题概览
-            </h4>
-            <p className="text-gray-100 text-lg font-medium mb-4">{data.summary}</p>
-            {data.problem_dimensions.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {data.problem_dimensions.map(p => {
-                  const style = SEVERITY_STYLES[p.severity] ?? SEVERITY_STYLES.attention;
+          {problemOverview ? (
+            <div className="bg-[#1a1b23] rounded-lg p-6 border border-gray-800">
+              <h4 className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-3">
+                {'\u26A0\uFE0F'} 问题概览
+              </h4>
+              <p className="text-gray-100 text-lg font-medium mb-4">{problemOverview.summary}</p>
+              {problemOverview.problem_dimensions.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {problemOverview.problem_dimensions.map((p) => {
+                    const style = SEVERITY_STYLES[p.severity] ?? SEVERITY_STYLES.attention;
+                    return (
+                      <div key={p.dimension}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg ${style.bg} border border-gray-700`}>
+                        <span className={`text-sm font-semibold ${style.text}`}>{p.dimension_cn}</span>
+                        <span className="text-gray-400 font-mono text-sm">{p.score}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded ${style.bg} ${style.text}`}>
+                          {style.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : (
+            running && <SkeletonCard title="问题概览" />
+          )}
+
+          {/* Card 2: 根因分析 */}
+          {rootCauses ? (
+            <div className="bg-[#1a1b23] rounded-lg p-6 border border-gray-800">
+              <h4 className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-4">
+                {'\uD83E\uDDE0'} 根因分析
+              </h4>
+              <div className="space-y-3">
+                {rootCauses.map((rc, i) => {
+                  const conf = CONFIDENCE_STYLES[rc.confidence] ?? CONFIDENCE_STYLES.medium;
                   return (
-                    <div key={p.dimension}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg ${style.bg} border border-gray-700`}>
-                      <span className={`text-sm font-semibold ${style.text}`}>{p.dimension_cn}</span>
-                      <span className="text-gray-400 font-mono text-sm">{p.score}</span>
-                      <span className={`text-xs px-1.5 py-0.5 rounded ${style.bg} ${style.text}`}>
-                        {style.label}
-                      </span>
+                    <div key={i} className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <p className="text-gray-200 font-medium">{rc.hypothesis}</p>
+                        <span className={`shrink-0 px-2 py-0.5 rounded text-xs font-medium ${conf.bg} ${conf.text}`}>
+                          置信度: {conf.label}
+                        </span>
+                      </div>
+                      {rc.evidence.length > 0 && (
+                        <ul className="space-y-1 mt-2">
+                          {rc.evidence.map((e, j) => (
+                            <li key={j} className="text-gray-400 text-sm flex items-start gap-2">
+                              <span className="text-gray-600 mt-0.5">{'\u2022'}</span>
+                              <span>{e}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   );
                 })}
               </div>
-            )}
-          </div>
-
-          {/* Card 2: 根因分析 */}
-          <div className="bg-[#1a1b23] rounded-lg p-6 border border-gray-800">
-            <h4 className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-4">
-              {'\uD83E\uDDE0'} 根因分析
-            </h4>
-            <div className="space-y-3">
-              {data.root_causes.map((rc, i) => {
-                const conf = CONFIDENCE_STYLES[rc.confidence] ?? CONFIDENCE_STYLES.medium;
-                return (
-                  <div key={i} className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <p className="text-gray-200 font-medium">{rc.hypothesis}</p>
-                      <span className={`shrink-0 px-2 py-0.5 rounded text-xs font-medium ${conf.bg} ${conf.text}`}>
-                        置信度: {conf.label}
-                      </span>
-                    </div>
-                    {rc.evidence.length > 0 && (
-                      <ul className="space-y-1 mt-2">
-                        {rc.evidence.map((e, j) => (
-                          <li key={j} className="text-gray-400 text-sm flex items-start gap-2">
-                            <span className="text-gray-600 mt-0.5">{'\u2022'}</span>
-                            <span>{e}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                );
-              })}
             </div>
-          </div>
+          ) : hasError('root_cause') ? (
+            <ErrorCard title="根因分析" message={getError('root_cause')!.message} />
+          ) : (
+            running && <SkeletonCard title="根因分析" />
+          )}
 
-          {/* Card 3: 行动建议 */}
-          <div className="bg-[#1a1b23] rounded-lg p-6 border border-gray-800">
-            <h4 className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-4">
-              {'\uD83D\uDCCB'} 行动建议
-            </h4>
-            <div className="space-y-3">
-              {data.action_plan.map((item, i) => (
-                <ActionCard key={i} item={item} />
-              ))}
-            </div>
-          </div>
-
-          {/* Card 4: 竞品对标 */}
-          <div className="bg-[#1a1b23] rounded-lg p-6 border border-gray-800">
-            <h4 className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-3">
-              {'\uD83C\uDFC6'} 竞品对标
-            </h4>
-            <div className="mb-3">
-              <span className="text-gray-400 text-sm">类目位置: </span>
-              <span className="text-gray-200 font-medium">{data.benchmark.category_position}</span>
-            </div>
-            {data.benchmark.weak_vs_benchmark.length > 0 && (
+          {/* Card 3: 竞品对标 */}
+          {benchmark ? (
+            <div className="bg-[#1a1b23] rounded-lg p-6 border border-gray-800">
+              <h4 className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-3">
+                {'\uD83C\uDFC6'} 竞品对标
+              </h4>
               <div className="mb-3">
-                <div className="text-gray-400 text-sm mb-1.5">弱于基准的维度:</div>
-                <ul className="space-y-1">
-                  {data.benchmark.weak_vs_benchmark.map((w, i) => (
-                    <li key={i} className="text-orange-400 text-sm flex items-start gap-2">
-                      <span className="mt-0.5">{'\u25BC'}</span>
-                      <span>{w}</span>
-                    </li>
-                  ))}
-                </ul>
+                <span className="text-gray-400 text-sm">类目位置: </span>
+                <span className="text-gray-200 font-medium">{benchmark.category_position}</span>
               </div>
-            )}
-            <div className="bg-gray-800/30 rounded-lg p-3 text-gray-300 text-sm whitespace-pre-wrap">
-              {data.benchmark.competitor_insights}
+              {benchmark.weak_vs_benchmark.length > 0 && (
+                <div className="mb-3">
+                  <div className="text-gray-400 text-sm mb-1.5">弱于基准的维度:</div>
+                  <ul className="space-y-1">
+                    {benchmark.weak_vs_benchmark.map((w, i) => (
+                      <li key={i} className="text-orange-400 text-sm flex items-start gap-2">
+                        <span className="mt-0.5">{'\u25BC'}</span>
+                        <span>{w}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="bg-gray-800/30 rounded-lg p-3 text-gray-300 text-sm whitespace-pre-wrap">
+                {benchmark.competitor_insights}
+              </div>
             </div>
-          </div>
+          ) : hasError('benchmark') ? (
+            <ErrorCard title="竞品对标" message={getError('benchmark')!.message} />
+          ) : (
+            running && <SkeletonCard title="竞品对标" />
+          )}
+
+          {/* Card 4: 行动建议 */}
+          {actionPlan ? (
+            <div className="bg-[#1a1b23] rounded-lg p-6 border border-gray-800">
+              <h4 className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-4">
+                {'\uD83D\uDCCB'} 行动建议
+              </h4>
+              <div className="space-y-3">
+                {actionPlan.map((item, i) => (
+                  <ActionCard key={i} item={item} />
+                ))}
+              </div>
+            </div>
+          ) : hasError('action_plan') ? (
+            <ErrorCard title="行动建议" message={getError('action_plan')!.message} />
+          ) : (
+            running && <SkeletonCard title="行动建议" />
+          )}
         </div>
       )}
     </div>
